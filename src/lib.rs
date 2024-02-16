@@ -1,182 +1,80 @@
-#![allow(dead_code)]
+mod syntax_tree;
 
-pub mod individual {
-    use std::collections::{HashMap, HashSet, VecDeque};
+pub mod initialization {
+    #![allow(dead_code)]
+    use rand::Rng;
+    use std::collections::HashMap;
+
+    use crate::syntax_tree::*;
 
     #[derive(PartialEq)]
-    pub enum Order {
-        Prefix, 
-        Infix, 
-        Postfix,
+    pub enum Method {
+        Full,
+        Grow,
     }
 
-    pub struct Node<T> 
-        where 
-            T: PartialEq 
+    type OperatorSet<T> = HashMap<String, (usize, fn(&Vec<Vec<T>>))>;
+
+    fn get_random_operator<T, R>(rng: &mut R, op_set: &OperatorSet<T>) -> Option<(String, usize)>
+    where
+        R: Rng,
     {
-        idx:        String,
-        val:        T,
-        parent:     Option<usize>,
+        let rand: usize = rng.gen_range(0..op_set.len());
+
+        let key = op_set.keys().nth(rand)?;
+        let operator = op_set.get(key)?;
+
+        Some((key.to_string(), operator.0))
     }
 
-    impl<T> Node<T> 
-        where 
-            T: PartialEq
+    pub fn init<T, R>(
+        rng: &mut R,
+        max_depth: usize,
+        func_set: &OperatorSet<T>,
+        term_set: &OperatorSet<T>,
+        method: Method,
+    ) -> SyntaxTree<T>
+    where
+        T: PartialEq + Default,
+        R: Rng,
     {
-        pub fn new(idx: String, val: T) -> Self {
-            Self { idx, val, parent: None }
-        }
-    }
+        let mut stack: Vec<usize> = Vec::new();
+        let mut arena: Vec<Node<T>> = Vec::new();
+        let mut children: Vec<usize> = Vec::new();
 
-    pub struct SyntaxTree<T> 
-        where 
-            T: PartialEq
-    {
-        arena:      Vec<Node<T>>,
-        children:   HashMap<usize, Vec<usize>>,
-    }
+        let func_size: usize = func_set.len();
+        let term_size: usize = term_set.len();
 
-    impl<T> SyntaxTree<T> 
-        where 
-            T: PartialEq
-    {
-        pub fn new() 
-            -> Self 
-        { Self { arena: Vec::new(), children: HashMap::new() } }
+        let is_terminal: bool = rng.gen_range(0..(term_size + func_size)) < term_size;
 
-        pub fn insert(&mut self, node: Node<T>, children: Option<Vec<usize>>) {
-            self.arena.push(node);
-            if let Some(children) = children {
-                self.children.insert(self.arena.len()-1, children);
+        if max_depth == 0 || (method == Method::Grow && is_terminal) {
+            let val: T = Default::default();
+
+            match get_random_operator(rng, term_set) {
+                Some((label, _)) => arena.push(Node::new(label, val)),
+                None => panic!("Something went wrong"),
             }
-        }
+        } else {
+            let val: T = Default::default();
 
-        fn delete(&mut self, idx: usize) {
-            self.arena.remove(idx);
-            self.children.remove(&idx);
-        }
+            match get_random_operator(rng, func_set) {
+                Some((label, arity)) => {
+                    arena.push(Node::new(label, val));
 
-        fn search(&self) { todo!(); }
+                    let parent: usize = arena.len() - 1;
+                    let child_left: usize = arena.len();
+                    let mut child_right: usize = 0;
 
-        pub fn dfs(&self, idx: usize, order: Order) 
-            -> Option<Vec<usize>>
-        {
-            if self.arena.get(idx).is_none() {
-                return None;
-            }
-
-            match order {
-                Order::Prefix   => Some(self.preorder(idx)),
-                Order::Postfix  => Some(self.postorder(idx)),
-                Order::Infix    => Some(self.inorder(idx)),
-            }
-        }
-    
-        fn preorder(&self, idx: usize)
-            -> Vec<usize>
-        {
-            let mut stack:  Vec<usize> = Vec::new();
-            let mut result: Vec<usize> = Vec::new();
-            stack.push(idx);
-            
-            while let Some(current) = stack.pop() {
-                result.push(current);
-
-                if let Some(children) = self.children.get(&current) {
-                    for &child in children.iter().rev() {
-                        stack.push(child);
+                    for _ in 0..arity {
+                        child_right = arena.len();
                     }
                 }
+                None => panic!("Something went wrong"),
             }
-
-            result.push(idx);
-            result
         }
 
-        fn postorder(&self, idx: usize)
-            -> Vec<usize>
-        {
-            let mut stack:  Vec<usize> = Vec::new();
-            let mut result: Vec<usize> = Vec::new();
-            stack.push(idx);
+        let mut tree: SyntaxTree<T> = SyntaxTree::new();
 
-            while let Some(current) = stack.pop() {
-                if current != idx {
-                    result.push(current);
-                }
-                if let Some(children) = self.children.get(&current) {
-                    for &child in children.iter().rev() {
-                        stack.push(child)
-                    }
-                }
-            }
-
-            result.push(idx);
-            result
-        }
-
-        fn inorder(&self, idx: usize)
-            -> Vec<usize>
-        {
-            let mut stack: Vec<usize> = Vec::new();
-            let mut visited: HashSet<usize> = HashSet::new();
-            let mut result: Vec<usize> = Vec::new();
-
-            let mut current: usize = idx;
-            while !stack.is_empty() || current != usize::MAX {
-                while current != usize::MAX {
-                    if visited.contains(&current) {
-                        break;
-                    }
-                    stack.push(current);
-                    current = self.children.get(&current)
-                        .and_then(|children| children.first())
-                        .copied().unwrap_or(usize::MAX);
-                }
-
-                if let Some(idx) = stack.pop() {
-                    result.push(idx);
-                    visited.insert(idx);
-
-                    current = self.children.get(&idx)
-                        .and_then(|children| children.get(1))
-                        .copied().unwrap_or(usize::MAX);
-                }
-            }
-            result
-        }
-
-        pub fn bfs(&self, idx:usize)
-            -> Option<Vec<usize>>
-        {
-            let mut queue: VecDeque<usize> = VecDeque::new();
-            let mut result: Vec<usize> = Vec::new();
-            queue.push_back(idx);
-
-            while !queue.is_empty() {
-                let current = queue.pop_front().unwrap();
-
-                result.push(current);
-
-                if let Some(children) = self.children.get(&current) {
-                    for child in children {
-                        queue.push_back(*child);
-                    }
-                }
-            }
-            Some(result)
-        }
-
-        fn root(&self)                  -> Option<&Node<T>> { self.arena.get(0) }
-        fn parent(&self, idx: usize)    -> Option<usize> { self.arena.get(idx).unwrap().parent }
-        fn children(&self, idx: usize)  -> &Vec<usize> { &self.children.get(&idx).unwrap() }
-        
-        fn is_leaf(&self, idx: usize)   -> bool { if self.children.get(&idx).is_some() { true } else { false } }
-        fn height(&self, idx: usize)    -> usize { todo!() }
-        fn depth(&self, idx: usize)     -> usize { todo!() }
-
-        fn is_empty(&self)              -> bool { self.arena.is_empty() }
-        fn size(&self)                  -> usize { self.arena.len() }
-        fn clear(&mut self)             { self.arena = Vec::new(); self.children = HashMap::new(); }
+        tree
     }
 }
