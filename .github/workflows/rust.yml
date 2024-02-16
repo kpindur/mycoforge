@@ -14,7 +14,8 @@ jobs:
   
   steps:
     - uses: actions/checkout@v4
-    - run: rustup update stable
+    - name: Update Rustup
+      run: rustup update stable
     - name: Check
       run: cargo check --verbose
     - name: Tests
