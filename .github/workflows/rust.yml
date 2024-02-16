@@ -11,13 +11,12 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-  
-  steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-    - name: Update Rustup
-      run: rustup update stable
-    - name: Check
-      run: cargo check --verbose
-    - name: Tests
-      run: cargo test --verbose
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Update Rustup
+        run: rustup update stable
+      - name: Check
+        run: cargo check --verbose
+      - name: Tests
+        run: cargo test --verbose
