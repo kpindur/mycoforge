@@ -1,6 +1,6 @@
 # MycoForge
 
-[![GHA Build Status](https://github.com/kpindur/mycoforge/workflows/rust.yml/badge.svg)](https://github.com/kpindur/mycoforge/actions?query=workflow%3AMycoForge)
+![GHA Build Status](https://github.com/kpindur/mycoforge/actions/workflows/main.yml/badge.svg)
 
 Initial README
 
