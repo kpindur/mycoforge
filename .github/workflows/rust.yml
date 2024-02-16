@@ -20,14 +20,24 @@ jobs:
         run: cargo check --verbose
       - name: Tests
         run: cargo test --verbose
-      - name: Cache Tarpaulin binaries
-        uses: actions/cache@v2
+      - name: Cache Tarpaulin dependencies
+        uses: actions/cache@v3
         with:
-          path: ~/.cargo/bin
-          key: tarpaulin-coverage-{{ hashFiles('**/Cargo.lock') }}
+          path: |
+            ~/.cargo
+            ./target
+          key: tarpaulin-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          tarpaulin-${{ runner.os }}-
       - name: Generate Code Coverage via tarpaulin
-        run: cargo tarpaulin --out Xml
+        run: |
+          if ! command -v cargo-tarpaulin &> /dev/null; then
+            cargo install cargo-tarpaulin
+          fi
+          cargo tarpaulin --out Xml
+
       - name: Coverage report via Codecov
         uses: codecov/codecov-action@v4.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          slug: kpindur/mycoforge
