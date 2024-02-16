@@ -27,8 +27,8 @@ jobs:
             ~/.cargo
             ./target
           key: tarpaulin-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          tarpaulin-${{ runner.os }}-
+          restore-keys: |
+            tarpaulin-${{ runner.os }}-
       - name: Generate Code Coverage via tarpaulin
         run: |
           if ! command -v cargo-tarpaulin &> /dev/null; then
