@@ -10,8 +10,8 @@ Initial README
 - [ ] README
 - [ ] Initialization
 - [ ] Optimizers
- - [ ] GA
-  - [ ] Evolutionary Operators
- - [ ] EDA
-  - [ ] Learning/Updating algorithms
+    - [ ] GA
+        - [ ] Evolutionary Operators
+    - [ ] EDA
+        - [ ] Learning/Updating algorithms
 - [ ] Schemata (?)
