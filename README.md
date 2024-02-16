@@ -1,4 +1,4 @@
-![CI](https://github.com/username/repository/workflows/CI/badge.svg)
+![CI](https://github.com/kpindur/mycoforge/workflows/CI/badge.svg)
 
 # MycoForge
 
