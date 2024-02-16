@@ -22,9 +22,10 @@ jobs:
         run: cargo test --verbose
       - name: Install Tarpaulin
         run: cargo install cargo-tarpaulin
+      - name: Generate Code Coverage via tarpaulin
+        run: cargo tarpaulin --out Xml
       - name: Coverage report via Codecov
         uses: codecov/codecov-action@v4.0.1
-        run: cargo tarpaulin --out Xml
         env:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: kpindur/mycoforge
