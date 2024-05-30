@@ -2,18 +2,29 @@
 pub mod linear_structure {
     use crate::genotype::traits::Initialization;
     use rand::{
-        Rng, RngCore, rngs::StdRng, SeedableRng,
+        Rng, RngCore,
         distributions::{Distribution, Standard, WeightedIndex}, 
     };
 
     /// Initialize linear structure uniformly
     /// 
+    /// This initialization scheme creates a vector of elements with uniformly 
+    /// distributed values of `T`.
     pub struct InitUniform<T> {
         size: usize,
         _marker: std::marker::PhantomData<T>
     }
 
     impl<T> InitUniform<T> {
+        /// Creates a new instance of `InitUniform`.
+        ///
+        /// # Arguments
+        ///
+        /// * `size`: The size of the vector to be initialized
+        ///
+        /// # Returns
+        ///
+        /// A new instance of `InitUniform`.
         pub fn new(size: usize) -> Self {
             return InitUniform{ size, _marker: std::marker::PhantomData }
         }
@@ -28,11 +39,11 @@ pub mod linear_structure {
         ///
         /// # Arguments
         ///
-        /// * `rng` - mutable random number generator
+        /// * `rng`: mutable random number generator
         ///
         /// # Returns
         ///
-        /// Initialized Vec<T>.
+        /// Vector of randomly initialized elements.
         fn initialize(&self, rng: &mut R) -> Vec<T> {
             let seq: Vec<T> = (0..self.size).map(|_| rng.gen::<T>()).collect();
 
@@ -40,8 +51,10 @@ pub mod linear_structure {
         }
     }
 
-    /// Initialize linear structure with probability distribution
+    /// Initialize linear structure according to a given set of probability distributions
     /// 
+    /// This initialization scheme creates a vector of elements distributed according to a set of
+    /// probability distributions.
     pub struct InitFromDistribution<T> {
         size: usize,
         range: Vec<T>,
@@ -52,6 +65,18 @@ pub mod linear_structure {
     where
         T: Clone
     {
+        /// Create an instance of `InitFromDistribution`.  
+        ///
+        /// # Arguments
+        ///
+        /// * `size`: The size of the initialized individual
+        /// * `range`: The possible values over which probability distributions are defined
+        /// * `distributions`: Set of probability distributions of values in `range` at specific indices.
+        /// E.g. `distributions[i]` is the distribution of `range` at the index `i`
+        ///
+        /// # Returns
+        ///
+        /// A new instance of `InitFromDistribution`.
         fn new(size: usize, range: &[T], distributions: &[&[f64]]) -> Self {
             let mut dists: Vec<WeightedIndex<f64>> = Vec::new();
 
@@ -76,7 +101,7 @@ pub mod linear_structure {
         T: Clone,
         Standard: Distribution<T>
     {
-        /// Initialize linear structure using stored probability distribution. 
+        /// Initialize linear structure. 
         ///
         /// # Arguments
         ///
@@ -84,7 +109,7 @@ pub mod linear_structure {
         ///
         /// # Returns
         ///
-        /// Initialized Vec<T>.
+        /// Vector of randomly initialized elements.
         fn initialize(&self, rng: &mut R) -> Vec<T> {
             let seq: Vec<usize> = (0..self.size).zip(self.dist.iter())
                 .map(|(_, dist)| dist.sample(rng)).collect();
@@ -99,6 +124,10 @@ pub mod linear_structure {
     mod linear_tests {
         use super::*;
         use std::collections::HashMap;
+        use rand::{
+            rngs::StdRng,
+            SeedableRng
+        };
 
         fn chi_square_test(observed: &HashMap<usize, (usize, usize)>, expected: &HashMap<usize, (f64, f64)>) -> Vec<f64> {
             let mut results: Vec<f64> = Vec::new();
