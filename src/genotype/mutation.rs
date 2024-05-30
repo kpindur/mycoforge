@@ -2,8 +2,7 @@
 pub mod linear_structure {
     use crate::genotype::traits::Mutation;
     use rand::{
-        Rng, RngCore, rngs::StdRng, SeedableRng,
-        distributions::{Distribution, Standard, WeightedIndex}, 
+        Rng, RngCore
     };
 
     pub struct UniformBinaryMutation {
@@ -16,11 +15,9 @@ pub mod linear_structure {
         }
     }
 
-    impl<R, bool> Mutation<R, bool> for UniformBinaryMutation 
+    impl<R> Mutation<R, bool> for UniformBinaryMutation 
     where
-        R: RngCore,
-        Standard: Distribution<bool>,
-        bool: std::clone::Clone
+        R: RngCore
     {
         fn mutate(&self, rng: &mut R, genotype: &[bool]) -> Vec<bool> {
             let mut mutant: Vec<bool> = Vec::from(genotype);
@@ -37,6 +34,11 @@ pub mod linear_structure {
     mod linear_tests {
         use super::*;
         use crate::genotype::{init::linear_structure::InitUniform, traits::Initialization};
+
+        use rand::{
+            rngs::StdRng, 
+            SeedableRng
+        };
 
         #[test]
         fn uniform_binary_mutation_works() {
