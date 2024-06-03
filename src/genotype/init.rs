@@ -177,7 +177,7 @@ pub mod linear_structure {
             
             let expected: HashMap<usize, (f64, f64)> = (0..n).map(|id| (id, (0.5f64, 0.5f64))).collect();
             let results = chi_square_test(&observed, &expected);
-            // Critical value for chi-square test for 1-degree od freedom ~= 3.84
+            // Critical value for chi-square test for 1-degree of freedom ~= 3.84
             assert!(results.iter().all(|&result| result < 3.84), "Error: Chi Square Test failed! {:?} > {}", results, 3.84)
         }
 
@@ -242,7 +242,7 @@ pub mod linear_structure {
                     return counts;
                 }).collect();
             let results = vector_chi_square_test(&observed, &expected);
-            // Critical value for chi-square test for 1-degree od freedom ~= 3.84
+            // Critical value for chi-square test for 1-degree of freedom ~= 3.84
             assert!(results.iter().all(|&result| result < 3.84), "Error: Chi Square Test failed! {:?} > {}", results, 3.84)
             
         }
