@@ -1,10 +1,5 @@
 use crate::genotype::traits::*;
 
-use rand::{
-    prelude::*, 
-    distributions::WeightedIndex,
-};
-
 pub mod linear_structure {
     use rand::RngCore;
     use crate::genotype::traits::Genotype;
@@ -96,167 +91,203 @@ pub mod linear_structure {
     }
 }
 
+pub mod operator_set_sampler {
+    use rand::{
+        RngCore,
+        distributions::{Distribution, WeightedIndex}
+    };
 
+    pub type OperatorSet<T> = fn(T) -> T;
 
-type OperatorSet<T> = fn(T) -> T;
+    pub struct OperatorSampler<T> {
+        ids: Vec<String>,
+        ops: Vec<OperatorSet<T>>,
+        distribution: WeightedIndex<f64>
+    }
 
-pub struct OperatorSampler<T> {
-    ids: Vec<String>,
-    ops: Vec<OperatorSet<T>>,
-    distribution: WeightedIndex<f64>
-}
+    impl<T> OperatorSampler<T> {
+        pub fn new(ids: &[String], ops: &[OperatorSet<T>], probs: &[f64]) -> Self {
+            let lengths_match = ids.len() == ops.len() && ids.len() == probs.len();
+            assert!(lengths_match, "Error: Lengths do not match!");
+            
+            let is_distribution = probs.iter().sum::<f64>() == 1.0;
+            assert!(is_distribution, "Error: Probability distribution does not sum to 1.0! Sum: {}", probs.iter().sum::<f64>());
 
-impl<T> OperatorSampler<T> {
-    fn new(ids: &[String], ops: &[OperatorSet<T>], probs: &[f64]) -> Self {
-        let lengths_match = ids.len() == ops.len() && ids.len() == probs.len();
-        assert!(lengths_match, "Error: Lengths do not match!");
+            return Self { 
+                ids: ids.to_vec(), 
+                ops: ops.to_vec(), 
+                distribution: WeightedIndex::new(probs).unwrap()
+            };
+        }
         
-        let is_distribution = probs.iter().sum::<f64>() == 1.0;
-        assert!(is_distribution, "Error: Probability distribution does not sum to 1.0! Sum: {}", probs.iter().sum::<f64>());
+        pub fn sample<R: RngCore>(&self, rng: &mut R) -> (String, OperatorSet<T>) {
+            let id: usize = self.distribution.sample(rng);
 
-        return Self { 
-            ids: ids.to_vec(), 
-            ops: ops.to_vec(), 
-            distribution: WeightedIndex::new(probs).unwrap()
+            return (self.ids[id].clone(), self.ops[id].clone());
+        }
+        
+    }
+
+    #[cfg(test)]
+    mod distribution_tests {
+        use super::*;
+
+        use rand::{
+            rngs::StdRng, SeedableRng
         };
-    }
-    
-    fn sample<R: Rng>(&self, rng: &mut R) -> (String, OperatorSet<T>) {
-        let id: usize = self.distribution.sample(rng);
+        use std::collections::HashMap;
 
-        return (self.ids[id].clone(), self.ops[id].clone());
+        fn test(v: String) -> String {
+            v
+        }
+        
+        fn chi_square_test(observed: &[String], expected: &HashMap<String, f64>) -> f64 {
+            let mut chi_square: f64 = 0.0;
+            let mut count: HashMap<String, usize> = HashMap::new();
+            
+            for id in observed {
+                *count.entry(id.clone()).or_insert(0) += 1; 
+            }
+            
+            for key in count.keys() {
+                let obs = count.get(key).unwrap();
+                let exp = expected.get(key).unwrap() * observed.len() as f64;
+
+                chi_square += (*obs as f64 - exp).powf(2.0) / exp;
+            }
+
+            return chi_square;
+        }
+
+        #[test]
+        fn uniform_sample_works() {
+            let seed: [u8; 32] = [0; 32];
+            let mut rng = StdRng::from_seed(seed);
+
+            let ids: Vec<String> = vec!["id0".to_string(), "id1".to_string(), "id2".to_string(), "id3".to_string(), "id4".to_string()];
+            let ops: Vec<OperatorSet<String>> = vec![test; ids.len()];
+
+            let uniform: Vec<f64> = vec![1.0 / ids.len() as f64; ids.len()];
+            let temp: OperatorSampler<String> = OperatorSampler::new(&ids, &ops, &uniform);
+            
+            let n: usize = 1000;
+            let samples: Vec<String> = (0..n).map(|_| temp.sample(&mut rng).0).collect();
+
+            let expected: Vec<(String, f64)> = ids.iter().zip(uniform.iter()).map(|(i, p)| (i.clone(), p.clone())).collect();
+            let expected: HashMap<String, f64> = HashMap::from_iter(expected);
+            let chi_square = chi_square_test(&samples, &expected);
+            
+            //NOTE: 9.488 is a critical value for a = 0.05 and df = 4 (ids.len() - 1)
+            assert!(chi_square < 9.488, "Error: Chi Square Test failed! {} > {}", chi_square, 9.488);    
+        }
+
+        #[test]
+        fn custom_sample_works() {
+            let seed: [u8; 32] = [0; 32];
+            let mut rng = StdRng::from_seed(seed);
+
+            let ids: Vec<String> = vec!["id0".to_string(), "id1".to_string(), "id2".to_string(), "id3".to_string(), "id4".to_string()];
+            let ops: Vec<OperatorSet<String>> = vec![test; ids.len()];
+
+            let custom: Vec<f64> = vec![0.25, 0.25, 0.1, 0.1, 0.3];
+            let temp: OperatorSampler<String> = OperatorSampler::new(&ids, &ops, &custom);
+            
+            let n: usize = 1000;
+            let samples: Vec<String> = (0..n).map(|_| temp.sample(&mut rng).0).collect();
+
+            let expected: Vec<(String, f64)> = ids.iter().zip(custom.iter()).map(|(i, p)| (i.clone(), p.clone())).collect();
+            let expected: HashMap<String, f64> = HashMap::from_iter(expected);
+            let chi_square = chi_square_test(&samples, &expected);
+            
+            //NOTE: 9.488 is a critical value for a = 0.05 and df = 4 (ids.len() - 1)
+            // -> possibly change to use chi distribution?
+            assert!(chi_square < 9.488, "Error: Chi Square Test failed! {} > {}", chi_square, 9.488);    
+        }
     }
-    
 }
 
-#[cfg(test)]
-mod distribution_tests {
-    use super::*;
+pub mod nonlinear_structure {
     use std::collections::HashMap;
 
-    fn test(v: String) -> String {
-        v
+    use super::{operator_set_sampler::{OperatorSampler, OperatorSet}, Genotype};
+    use rand::RngCore;
+
+    pub struct Node<T> 
+    where
+        T: PartialEq
+    {
+        idx: String,
+        val: T,
+        parent: Option<usize>
+    }
+
+    impl<T> Node<T>
+    where
+        T: PartialEq + Default 
+    {
+        fn new(idx: String, val: T, parent: Option<usize>) -> Self {
+            return Self { idx, val, parent };
+        }
+
+        fn sample_from<R>(rng: &mut R, op_sampler: OperatorSampler<T>) -> Self
+        where
+            R: RngCore 
+        {
+            let (sampled_id, _): (String, OperatorSet<T>) = op_sampler.sample(rng);
+            return Self { idx: sampled_id, val: T::default(), parent: None };
+        }
+    }
+
+    pub struct TreeGenotype<T> 
+    where
+        T: PartialEq + Default
+    {
+        arena: Vec<Node<T>>,
+        children: HashMap<usize, Vec<usize>>
+    }
+
+    impl<T> TreeGenotype<T>
+    where
+        T: PartialEq + Default
+    {
+        fn new() -> Self {
+            return Self { arena: Vec::new(), children: HashMap::new()}
+        }
+    }
+
+    impl<R, T> Genotype<R, T> for TreeGenotype<T>
+    where R: RngCore,
+          T: PartialEq + Default
+    {
+        fn initialize(rng: &mut R, init_scheme: &impl super::Initialization<R, T>) -> Self {
+            unimplemented!();
+        }
+
+        fn mutate(&self, rng: &mut R, mutation_scheme: &impl super::Mutation<R, T>) -> Self {
+            unimplemented!();
+        }
+
+        fn crossover(&self, rng: &mut R, other: &Self, crossover_scheme: &impl super::Crossover<R, T>) -> Vec<Self> {
+            unimplemented!();
+        }
     }
     
-    fn chi_square_test(observed: &[String], expected: &HashMap<String, f64>) -> f64 {
-        let mut chi_square: f64 = 0.0;
-        let mut count: HashMap<String, usize> = HashMap::new();
-        
-        for id in observed {
-            *count.entry(id.clone()).or_insert(0) += 1; 
+    #[cfg(test)]
+    mod nonlinear_tests {
+        #[test]
+        fn initialization_works() {
+            unimplemented!();
         }
-        
-        for key in count.keys() {
-            let obs = count.get(key).unwrap();
-            let exp = expected.get(key).unwrap() * observed.len() as f64;
-
-            chi_square += (*obs as f64 - exp).powf(2.0) / exp;
+        #[test]
+        fn mutation_works() {
+            unimplemented!();
         }
-
-        return chi_square;
-    }
-
-    #[test]
-    fn uniform_sample_works() {
-        let seed: [u8; 32] = [0; 32];
-        let mut rng = StdRng::from_seed(seed);
-
-        let ids: Vec<String> = vec!["id0".to_string(), "id1".to_string(), "id2".to_string(), "id3".to_string(), "id4".to_string()];
-        let ops: Vec<OperatorSet<String>> = vec![test; ids.len()];
-
-        let uniform: Vec<f64> = vec![1.0 / ids.len() as f64; ids.len()];
-        let temp: OperatorSampler<String> = OperatorSampler::new(&ids, &ops, &uniform);
-        
-        let n: usize = 1000;
-        let samples: Vec<String> = (0..n).map(|_| temp.sample(&mut rng).0).collect();
-
-        let expected: Vec<(String, f64)> = ids.iter().zip(uniform.iter()).map(|(i, p)| (i.clone(), p.clone())).collect();
-        let expected: HashMap<String, f64> = HashMap::from_iter(expected);
-        let chi_square = chi_square_test(&samples, &expected);
-        
-        //NOTE: 9.488 is a critical value for a = 0.05 and df = 4 (ids.len() - 1)
-        assert!(chi_square < 9.488, "Error: Chi Square Test failed! {} > {}", chi_square, 9.488);    
-    }
-
-    #[test]
-    fn custom_sample_works() {
-        let seed: [u8; 32] = [0; 32];
-        let mut rng = StdRng::from_seed(seed);
-
-        let ids: Vec<String> = vec!["id0".to_string(), "id1".to_string(), "id2".to_string(), "id3".to_string(), "id4".to_string()];
-        let ops: Vec<OperatorSet<String>> = vec![test; ids.len()];
-
-        let custom: Vec<f64> = vec![0.25, 0.25, 0.1, 0.1, 0.3];
-        let temp: OperatorSampler<String> = OperatorSampler::new(&ids, &ops, &custom);
-        
-        let n: usize = 1000;
-        let samples: Vec<String> = (0..n).map(|_| temp.sample(&mut rng).0).collect();
-
-        let expected: Vec<(String, f64)> = ids.iter().zip(custom.iter()).map(|(i, p)| (i.clone(), p.clone())).collect();
-        let expected: HashMap<String, f64> = HashMap::from_iter(expected);
-        let chi_square = chi_square_test(&samples, &expected);
-        
-        //NOTE: 9.488 is a critical value for a = 0.05 and df = 4 (ids.len() - 1)
-        // -> possibly change to use chi distribution?
-        assert!(chi_square < 9.488, "Error: Chi Square Test failed! {} > {}", chi_square, 9.488);    
+        #[test]
+        fn crossover_works() {
+            unimplemented!();
+        }
     }
 }
-
-//pub struct Node<T>
-//where
-//    T: PartialEq,
-//{
-//    idx: String,
-//    val: T,
-//    parent: Option<usize>,
-//}
-//
-//impl<T> Node<T> 
-//where
-//    T: PartialEq + Default
-//{
-//    fn new(idx: String, val: T, parent: Option<usize>) -> Self {
-//        return Self {
-//            idx, val, parent
-//        };
-//    }
-//
-//    fn sample_from<R: Rng>(rng: &mut R, op_sampler: OperatorSampler<T>) -> Self {
-//        let (sampled_idx, _): (String, OperatorSet<T>) = op_sampler.sample(rng);
-//        return Self {
-//            idx: sampled_idx, val: T::default(), parent: None
-//        };
-//    }
-//}
-//
-//pub struct TreeGenotype<T> 
-//where
-//    T: PartialEq + Default
-//{
-//    arena: Vec<Node<T>>,
-//    children: HashMap<usize, Vec<usize>>
-//}
-//
-//impl<T> TreeGenotype<T> 
-//where
-//    T: PartialEq + Default
-//{
-//    fn new() -> Self {
-//        return Self { 
-//            arena: Vec::new(),
-//            children: HashMap::new()
-//        };
-//    }
-//}
-//
-//impl<R, T> Genotype<R> for TreeGenotype<T>
-//where
-//    R: RngCore,
-//    T: PartialEq + Default
-//{
-//    fn initialize(rng: &mut R, size: usize) -> Self {
-//        todo!()
-//    }
 ////    pub fn init<T, R>(
 ////        rng: &mut R,
 ////        max_depth: usize,
@@ -307,30 +338,3 @@ mod distribution_tests {
 ////
 ////        tree
 ////    }
-//    
-//    fn mutate(&self, rng: &mut R, prob: f64) -> Self {
-//        todo!()
-//    }
-//
-//    fn crossover(&self, other: &Self, rng: &mut R, prob: f64) -> Vec<Self> {
-//        todo!()
-//    }
-//}
-//
-//#[cfg(test)]
-//mod nonlinear_tests {
-//    #[test]
-//    fn init_works() {
-//        unimplemented!()
-//    }
-//
-//    #[test]
-//    fn mutate_works() {
-//        unimplemented!()
-//    }
-//
-//    #[test]
-//    fn crossover_works() {
-//        unimplemented!()
-//    }
-//}
