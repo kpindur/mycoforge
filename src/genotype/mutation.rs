@@ -23,7 +23,7 @@ pub mod linear_structure {
             let mut mutant: Vec<bool> = Vec::from(genotype);
             for i in 0..mutant.len() {
                 let chance: f64 = rng.gen::<f64>();
-                if chance > self.probability { mutant[i] = rng.gen::<bool>(); }
+                if chance < self.probability { mutant[i] = rng.gen::<bool>(); }
             }
             return mutant;
         }

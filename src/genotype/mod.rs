@@ -4,5 +4,5 @@ pub mod init;
 pub mod mutation;
 pub mod crossover;
 
-//mod genotype;
+pub mod genotype;
 
