@@ -1,24 +1,22 @@
 use rand::RngCore;
 
-/// Initialization trait
-/// Should initialize and return the object. That is, initialization should be defined over the chosen
-/// genotype. `<T>` refers to a type cncapsulated in Genotype, s.t. `<T>` -> `Vec<T>`, for example
-/// `Initialization<bool> -> Vec<bool>`.
-pub trait Initialization<R, T> 
-where
-    R: RngCore
-{
-    fn initialize(&self, rng: &mut R) -> Vec<T>;
+use crate::genotype::init::{
+    InitUniform, InitFromDistribution
+};
+
+pub enum Initialization<T> {
+    Uniform(InitUniform<T>),
+    FromDistribution(InitFromDistribution<T>),
 }
 
-/// Mutation trait
-/// Should mutate and return the object. That is, mutation should be defined over the chosen genotype. `<T>`
-/// refers to a Genotype, for example `<T>: Vec<bool>`.
-pub trait Mutation<R, T>
-where
-    R: RngCore
-{
-    fn mutate(&self, rng: &mut R, genotype: &[T]) -> Vec<T>;
+
+use crate::genotype::mutation::{
+    UniformBinaryMutation,
+};
+
+pub enum Mutation<T> {
+    UniformBinary(UniformBinaryMutation),
+    marker(std::marker::PhantomData<T>)
 }
 
 /// Crossover trait
@@ -33,7 +31,6 @@ where
 
 /// Selection trait
 /// Should select specified number of individuals from given population. 
-///
 pub trait Selection<R, T>
 where
     R: RngCore
@@ -48,7 +45,7 @@ where
     R: RngCore,
     Self: Sized
 {
-    fn initialize(rng: &mut R, init_scheme: &impl Initialization<R, T>) -> Self;
-    fn mutate(&self, rng: &mut R, mutation_scheme: &impl Mutation<R, T>) -> Self;
+    fn initialize(rng: &mut R, init_scheme: &Initialization<T>) -> Self;
+    fn mutate(&self, rng: &mut R, mutation_scheme: &Mutation<T>) -> Self;
     fn crossover(&self, rng: &mut R, other: &Self, crossover_scheme: &impl Crossover<R, T>) -> Vec<Self>;
 }
