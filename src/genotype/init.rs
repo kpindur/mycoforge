@@ -211,10 +211,7 @@ mod linear_tests {
     }
 }
 
-use crate::genotype::{
-    genotype::operator_set_sampler::OperatorSampler, 
-    genotype::nonlinear_structure::Node
-};
+use crate::genotype::genotype::operator_set_sampler::OperatorSampler;
 
 ///
 ///
@@ -371,6 +368,8 @@ mod nonlinear_tests {
         init::Full, init::Grow
     };
 
+    use super::RampedHalfAndHalf;
+
     fn test(v: String) -> String {
         v
     }
@@ -411,7 +410,7 @@ mod nonlinear_tests {
         init_scheme.initialize(&mut rng, 0, &mut individual);
         
         println!("{:?}", individual);
-        assert!(false == true);
+        //TODO: Create sensible test case -> Chi square test?
     }
 
     #[test]
@@ -426,27 +425,22 @@ mod nonlinear_tests {
         init_scheme.initialize(&mut rng, 0, &mut individual);
         
         println!("{:?}", individual);
-        assert!(false == true);
+        //TODO: Create sensible test case -> Chi square test?
+    }
+
+    #[test]
+    fn init_ramped_works() {
+        let (func_set, term_set) = create_default_sets();
+
+        let seed: [u8; 32] = [0; 32];
+        let mut rng = StdRng::from_seed(seed);
+
+        let init_scheme: RampedHalfAndHalf<String> = RampedHalfAndHalf::new(2, 5, func_set, term_set);
+        let mut individual = Vec::new();
+        init_scheme.initialize(&mut rng, &mut individual);
+
+        println!("{:?}", individual);
+        //TODO: Create sensible test case -> Chi square test?
     }
 }
 
-/*
-let mut depth: Vec<usize> = Vec::new();
-// Node has String id, parent id, height
-let mut stack: Vec<(String, usize, usize)> = Vec::new();
-while let Some(cur_depth) = depth.pop() {
-    if cur_depth == self.max_height {
-        // Choose random expression from terminal set
-        let (id, _, arity) = self.term_set.sample(rng);
-        stack.push((id, arity, cur_depth));
-    } else {
-        // Choose random expression from function set
-        let (id, _, arity) = self.func_set.sample(rng);
-        for _ in 0..arity {
-            depth.push(cur_depth+1);
-        }
-        stack.push((id, arity, cur_depth));
-    }
-}
-return Vec::new();
-*/
