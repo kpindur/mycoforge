@@ -47,7 +47,7 @@ where
     T: Clone,
     Standard: Distribution<T>
 {
-    fn new(size: usize, range: &[T], distributions: &[&[f64]]) -> Self {
+    pub fn new(size: usize, range: &[T], distributions: &[&[f64]]) -> Self {
         let mut dists: Vec<WeightedIndex<f64>> = Vec::new();
 
         for &distribution in distributions {
@@ -228,7 +228,7 @@ impl<T> Full<T>
 where
     T: PartialEq + Clone
 {
-    fn new(max_height: usize, 
+    pub fn new(max_height: usize, 
            func_set: OperatorSampler<T>, term_set: OperatorSampler<T>) 
         -> Self {
         return Self { max_height, func_set, term_set };
@@ -245,9 +245,9 @@ where
     /// # Returns
     ///
     /// Initialized Vec<(String, usize, usize)>.
-    fn initialize<R: RngCore>
+    pub fn initialize<R: RngCore>
         (&self, rng: &mut R, 
-         depth: usize, stack: &mut Vec<(String, usize, usize)>)//NOTE: How to make it parallelizable?
+         depth: usize, stack: &mut Vec<(String, usize, usize)>)
     {
         if depth == self.max_height {
             let (id, _, arity) = self.term_set.sample(rng);

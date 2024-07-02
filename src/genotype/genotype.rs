@@ -1,94 +1,122 @@
-use crate::genotype::traits::*;
+use std::collections::{HashMap, HashSet};
+use rand::{
+    RngCore,
+    distributions::Standard,
+    prelude::Distribution
+};
 
-pub mod linear_structure {
-    use rand::RngCore;
-    use crate::genotype::traits::Genotype;
+use crate::genotype::enums::{
+    Initialization, Mutation,
+    Genotype
+};
+use crate::genotype::enums::Crossover;
 
-    /// Basic implementation of a linear structure
-    #[derive(Debug, Clone)]
-    pub struct LinearGenotype<T> {
-        seq: Vec<T>,
+/// Basic implementation of a linear structure
+#[derive(Debug, Clone)]
+pub struct LinearGenotype<T> {
+    seq: Vec<T>,
+}
+
+impl<R, T> Genotype<R, T> for LinearGenotype<T> 
+where
+    R: RngCore,
+    T: Clone,
+    Standard: Distribution<T>
+{
+    fn initialize(rng: &mut R, init_scheme: &Initialization<T>) -> Self {
+        let initialized = match init_scheme {
+            Initialization::Uniform(scheme)             => scheme.initialize(rng),
+            Initialization::FromDistribution(scheme)    => scheme.initialize(rng),
+            _ => panic!("Something went wrong!")
+        };
+        return Self { seq: initialized };
     }
-    
-    impl<R, T> Genotype<R, T> for LinearGenotype<T> 
-    where
-        R: RngCore,
-        T: Clone
-    {
-        fn initialize(rng: &mut R, init_scheme: &impl super::Initialization<R, T>) -> Self {
-            let initialized = init_scheme.initialize(rng);
-            return Self { seq: initialized };
-        }
 
-        fn mutate(&self, rng: &mut R, mutation_scheme: &impl super::Mutation<R, T>) -> Self {
-            let mutant = mutation_scheme.mutate(rng, &self.seq);
-            return Self { seq: mutant };
-        }
-
-        fn crossover(&self, rng: &mut R, other: &Self, crossover_scheme: &impl super::Crossover<R, T>) -> Vec<Self> {
-            let children = crossover_scheme.crossover(rng, (&self.seq, &other.seq));
-            return children.iter().map(|child| Self { seq: child.to_vec() }).collect::<Vec<Self>>();
-        }
+    fn mutate(&self, rng: &mut R, mutation_scheme: &Mutation<T>) -> Self {
+        todo!()
+     //   let mutant = match mutation_scheme {
+     //       Mutation::UniformBinary(scheme) => scheme.mutate(rng, self.seq.as_slice()),
+     //       _ => panic!("Something went wrong!")
+     //   };
+     //   return Self { seq: mutant };
     }
 
-    #[cfg(test)]
-    mod linear_tests {
-        use super::*;
-        use crate::genotype::{crossover::linear_structure::OnePointCrossover, init::linear_structure::InitUniform, mutation::linear_structure::UniformBinaryMutation, traits::Initialization};
-
-        use rand::prelude::*;
-
-        #[test]
-        fn init_works() {
-            let seed: [u8; 32] = [0; 32];
-            let mut rng = StdRng::from_seed(seed);
-
-            let pop_size = 100;
-            let mut population: Vec<LinearGenotype<bool>> = Vec::new();
-
-            let init_scheme: InitUniform<bool> = InitUniform::new(10);
-
-            for _ in 0..pop_size {
-                population.push(LinearGenotype::initialize(&mut rng, &init_scheme));
-            }
-
-            assert_eq!(pop_size, population.len(), "Error: population size is wrong!")
-        }
-
-        #[test]
-        fn mutate_works() {
-            let seed: [u8; 32] = [0; 32];
-            let mut rng = StdRng::from_seed(seed);
-            
-            let init_scheme: InitUniform<bool> = InitUniform::new(10);
-            let individual: LinearGenotype<bool> = LinearGenotype::initialize(&mut rng, &init_scheme);
-            
-            let mutation_scheme: UniformBinaryMutation = UniformBinaryMutation::new(1.0);
-            let mutant: LinearGenotype<bool> = individual.mutate(&mut rng, &mutation_scheme);
-            assert_ne!(individual.seq, mutant.seq,
-            "Error: Mutant is exactly the same!");
-        }
-
-        #[test]
-        fn crossover_works() {
-            let seed: [u8; 32] = [2; 32]; // NOTE: Success depends on the seed
-            let mut rng = StdRng::from_seed(seed);
-            
-            let init_scheme: InitUniform<bool> = InitUniform::new(10);
-            let parents: Vec<LinearGenotype<bool>> = vec![LinearGenotype::initialize(&mut rng, &init_scheme), LinearGenotype::initialize(&mut rng, &init_scheme)];
-            assert_ne!(parents[0].seq, parents[1].seq);
-            
-            let crossover_scheme: OnePointCrossover = OnePointCrossover::new(1.0);
-            let children: Vec<LinearGenotype<bool>> = parents[0].crossover(&mut rng, &parents[1], &crossover_scheme);
-
-            for i in 0..parents.len() {
-                for j in 0..children.len() {
-                    assert_ne!(parents[i].seq, children[j].seq, 
-                            "Error: Parent {} is the same as Child {}!", i, j);
-                }
-            }
-        }
+    fn crossover(&self, rng: &mut R, other: &Self, crossover_scheme: &impl Crossover<R, T>) -> Vec<Self> {
+        todo!()
+        //let children = crossover_scheme.crossover(rng, (&self.seq, &other.seq));
+        //return children.iter().map(|child| Self { seq: child.to_vec() }).collect::<Vec<Self>>();
     }
+}
+
+#[cfg(test)]
+mod linear_tests {
+    use rand::{
+        RngCore, SeedableRng,
+        rngs::StdRng,
+        distributions::Standard,
+        prelude::Distribution
+    };
+
+    use crate::genotype::{
+        init::InitUniform,
+        enums::{Initialization, Genotype},
+        genotype::LinearGenotype
+//        crossover::linear_structure::OnePointCrossover, 
+//        init::linear_structure::InitUniform, 
+//        mutation::linear_structure::UniformBinaryMutation
+    };
+
+    #[test]
+    fn init_works() {
+        let seed: [u8; 32] = [0; 32];
+        let mut rng = StdRng::from_seed(seed);
+
+        let pop_size = 100;
+        let mut population: Vec<LinearGenotype<bool>> = Vec::new();
+
+        let init_scheme: InitUniform<bool> = InitUniform::new(10);
+        let init_scheme: Initialization<bool> = Initialization::Uniform(init_scheme);
+
+        for _ in 0..pop_size {
+            population.push(LinearGenotype::initialize(&mut rng, &init_scheme));
+        }
+
+        assert_eq!(pop_size, population.len(), "Error: population size is wrong!")
+    }
+
+//    #[test]
+//    fn mutate_works() {
+//        let seed: [u8; 32] = [0; 32];
+//        let mut rng = StdRng::from_seed(seed);
+//        
+//        let init_scheme: InitUniform<bool> = InitUniform::new(10);
+//        let individual: LinearGenotype<bool> = LinearGenotype::initialize(&mut rng, &init_scheme);
+//        
+//        let mutation_scheme: UniformBinaryMutation = UniformBinaryMutation::new(1.0);
+//        let mutant: LinearGenotype<bool> = individual.mutate(&mut rng, &mutation_scheme);
+//        assert_ne!(individual.seq, mutant.seq,
+//        "Error: Mutant is exactly the same!");
+//    }
+//
+//    #[test]
+//    fn crossover_works() {
+//        let seed: [u8; 32] = [2; 32]; // NOTE: Success depends on the seed
+//        let mut rng = StdRng::from_seed(seed);
+//        
+//        let init_scheme: InitUniform<bool> = InitUniform::new(10);
+//        let parents: Vec<LinearGenotype<bool>> = vec![LinearGenotype::initialize(&mut rng, &init_scheme), LinearGenotype::initialize(&mut rng, &init_scheme)];
+//        assert_ne!(parents[0].seq, parents[1].seq);
+//        
+//        let crossover_scheme: OnePointCrossover = OnePointCrossover::new(1.0);
+//        let children: Vec<LinearGenotype<bool>> = parents[0].crossover(&mut rng, &parents[1], &crossover_scheme);
+//
+//        for i in 0..parents.len() {
+//            for j in 0..children.len() {
+//                assert_ne!(parents[i].seq, children[j].seq, 
+//                        "Error: Parent {} is the same as Child {}!", i, j);
+//            }
+//        }
+//    }
 }
 
 pub mod operator_set_sampler {
@@ -98,16 +126,24 @@ pub mod operator_set_sampler {
     };
 
     pub type OperatorSet<T> = fn(T) -> T;
-
-    pub struct OperatorSampler<T> {
+    
+    #[derive(Clone)]
+    pub struct OperatorSampler<T> 
+    where
+        T: Clone
+    {
         ids: Vec<String>,
         ops: Vec<OperatorSet<T>>,
+        arity: Vec<usize>,
         distribution: WeightedIndex<f64>
     }
 
-    impl<T> OperatorSampler<T> {
-        pub fn new(ids: &[String], ops: &[OperatorSet<T>], probs: &[f64]) -> Self {
-            let lengths_match = ids.len() == ops.len() && ids.len() == probs.len();
+    impl<T> OperatorSampler<T> 
+    where
+        T: Clone
+    {
+        pub fn new(ids: &[String], ops: &[OperatorSet<T>], arity: &[usize], probs: &[f64]) -> Self {
+            let lengths_match = ids.len() == ops.len() && ids.len() == probs.len() && ids.len() == arity.len();
             assert!(lengths_match, "Error: Lengths do not match!");
             
             let is_distribution = probs.iter().sum::<f64>() == 1.0;
@@ -116,15 +152,17 @@ pub mod operator_set_sampler {
             return Self { 
                 ids: ids.to_vec(), 
                 ops: ops.to_vec(), 
+                arity: arity.to_vec(),
                 distribution: WeightedIndex::new(probs).unwrap()
             };
         }
-        
-        pub fn sample<R: RngCore>(&self, rng: &mut R) -> (String, OperatorSet<T>) {
+        pub fn sample<R: RngCore>(&self, rng: &mut R) -> (String, OperatorSet<T>, usize) {
             let id: usize = self.distribution.sample(rng);
 
-            return (self.ids[id].clone(), self.ops[id].clone());
+            return (self.ids[id].clone(), self.ops[id].clone(), self.arity[id].clone());
         }
+
+        pub fn len(&self) -> usize { return self.ids.len(); }
         
     }
 
@@ -166,9 +204,10 @@ pub mod operator_set_sampler {
 
             let ids: Vec<String> = vec!["id0".to_string(), "id1".to_string(), "id2".to_string(), "id3".to_string(), "id4".to_string()];
             let ops: Vec<OperatorSet<String>> = vec![test; ids.len()];
+            let arity: Vec<usize> = (0..ids.len()).map(|_| 1usize).collect();
 
             let uniform: Vec<f64> = vec![1.0 / ids.len() as f64; ids.len()];
-            let temp: OperatorSampler<String> = OperatorSampler::new(&ids, &ops, &uniform);
+            let temp: OperatorSampler<String> = OperatorSampler::new(&ids, &ops, &arity, &uniform);
             
             let n: usize = 1000;
             let samples: Vec<String> = (0..n).map(|_| temp.sample(&mut rng).0).collect();
@@ -188,9 +227,10 @@ pub mod operator_set_sampler {
 
             let ids: Vec<String> = vec!["id0".to_string(), "id1".to_string(), "id2".to_string(), "id3".to_string(), "id4".to_string()];
             let ops: Vec<OperatorSet<String>> = vec![test; ids.len()];
+            let arity: Vec<usize> = (0..ids.len()).map(|_| 1usize).collect();
 
             let custom: Vec<f64> = vec![0.25, 0.25, 0.1, 0.1, 0.3];
-            let temp: OperatorSampler<String> = OperatorSampler::new(&ids, &ops, &custom);
+            let temp: OperatorSampler<String> = OperatorSampler::new(&ids, &ops, &arity, &custom);
             
             let n: usize = 1000;
             let samples: Vec<String> = (0..n).map(|_| temp.sample(&mut rng).0).collect();
@@ -206,135 +246,149 @@ pub mod operator_set_sampler {
     }
 }
 
-pub mod nonlinear_structure {
-    use std::collections::HashMap;
+use operator_set_sampler::OperatorSampler;
 
-    use super::{operator_set_sampler::{OperatorSampler, OperatorSet}, Genotype};
-    use rand::RngCore;
+#[derive(Debug)]
+pub struct Node<T> 
+where
+    T: PartialEq
+{
+    idx: String,
+    val: T,
+}
 
-    pub struct Node<T> 
-    where
-        T: PartialEq
-    {
-        idx: String,
-        val: T,
-        parent: Option<usize>
+impl<T> Node<T>
+where
+    T: PartialEq + Default + Clone
+{
+    fn new(idx: String) -> Self {
+        return Self { idx, val: T::default() };
     }
 
-    impl<T> Node<T>
-    where
-        T: PartialEq + Default 
-    {
-        fn new(idx: String, val: T, parent: Option<usize>) -> Self {
-            return Self { idx, val, parent };
-        }
+    fn evaluate<R: RngCore>(rng: &mut R, op_sampler: OperatorSampler<T>) -> Vec<T> {
+        todo!()
+    }
+}
 
-        fn sample_from<R>(rng: &mut R, op_sampler: OperatorSampler<T>) -> Self
-        where
-            R: RngCore 
-        {
-            let (sampled_id, _): (String, OperatorSet<T>) = op_sampler.sample(rng);
-            return Self { idx: sampled_id, val: T::default(), parent: None };
+#[derive(Debug)]
+pub struct TreeGenotype<T> 
+where
+    T: PartialEq + Default + Clone
+{
+    arena: Vec<Node<T>>,
+    depth: Vec<usize>,
+    arity: Vec<usize>,
+}
+
+impl<T> TreeGenotype<T>
+where
+    T: PartialEq + Default + Clone
+{
+    pub fn new() -> Self {
+        return Self { arena: Vec::new(), depth: Vec::new(), arity: Vec::new() }
+    }
+    pub fn root(&self) -> &Node<T> {
+        return self.arena.get(0).expect("Failed to get root!");
+    }
+    pub fn depth(&self, root: usize) -> &usize {
+        return self.depth.get(root).expect("Failed to get depth!");
+    }
+    pub fn arity(&self, root: usize) -> &usize {
+        return self.arity.get(root).expect("Failed to get arity!");
+    }
+    fn is_leaf(&self, idx: usize) -> bool {
+        return match self.arity(idx) {
+            0 => true,
+            _ => false,
         }
     }
 
-    pub struct TreeGenotype<T> 
-    where
-        T: PartialEq + Default
-    {
-        arena: Vec<Node<T>>,
-        children: HashMap<usize, Vec<usize>>
+    pub fn dfs(&self, root: usize) -> usize {
+        if root >= self.arena.len() { return 0; }
+        
+        let mut start = root;
+        let mut end = start;
+
+        for _ in 0..self.arity[start] {
+            let child_root = start+1;
+            let child_end = self.dfs(child_root);
+
+            end = child_end;
+            start = child_end;
+        }
+        return end;
+    }
+}
+
+impl<R, T> Genotype<R, T> for TreeGenotype<T> 
+where
+    R: RngCore,
+    T: PartialEq + Default + Clone,
+    Standard: Distribution<T>
+{
+    fn initialize(rng: &mut R, init_scheme: &Initialization<T>) -> Self {
+        let mut initialized: Vec<(String, usize, usize)> = Vec::new();
+        match init_scheme {
+            Initialization::Full(scheme)                => scheme.initialize(rng, 0, &mut initialized),
+            Initialization::Grow(scheme)                => scheme.initialize(rng, 0, &mut initialized),
+            Initialization::RampedHalfAndHalf(scheme)   => scheme.initialize(rng, &mut initialized),
+            _ => panic!("Something went wrong!")
+        };
+        let (mut arena, mut depth, mut arity) = (Vec::new(), Vec::new(), Vec::new());
+        for (id, d, a) in initialized {
+            arena.push(Node::new(id.to_string()));
+            depth.push(d);
+            arity.push(a);
+        }
+
+        return Self { arena, depth, arity };
     }
 
-    impl<T> TreeGenotype<T>
-    where
-        T: PartialEq + Default
-    {
-        fn new() -> Self {
-            return Self { arena: Vec::new(), children: HashMap::new()}
-        }
+    fn mutate(&self, rng: &mut R, mutation_scheme: &Mutation<T>) -> Self {
+        todo!()
+     //   let mutant = match mutation_scheme {
+     //       Mutation::UniformBinary(scheme) => scheme.mutate(rng, self.seq.as_slice()),
+     //       _ => panic!("Something went wrong!")
+     //   };
+     //   return Self { seq: mutant };
     }
 
-    impl<R, T> Genotype<R, T> for TreeGenotype<T>
-    where R: RngCore,
-          T: PartialEq + Default
-    {
-        fn initialize(rng: &mut R, init_scheme: &impl super::Initialization<R, T>) -> Self {
-            unimplemented!();
-        }
-
-        fn mutate(&self, rng: &mut R, mutation_scheme: &impl super::Mutation<R, T>) -> Self {
-            unimplemented!();
-        }
-
-        fn crossover(&self, rng: &mut R, other: &Self, crossover_scheme: &impl super::Crossover<R, T>) -> Vec<Self> {
-            unimplemented!();
-        }
+    fn crossover(&self, rng: &mut R, other: &Self, crossover_scheme: &impl Crossover<R, T>) -> Vec<Self> {
+        todo!()
+        //let children = crossover_scheme.crossover(rng, (&self.seq, &other.seq));
+        //return children.iter().map(|child| Self { seq: child.to_vec() }).collect::<Vec<Self>>();
     }
-    
-    #[cfg(test)]
-    mod nonlinear_tests {
-        #[test]
-        fn initialization_works() {
-            unimplemented!();
+}
+
+#[cfg(test)]
+mod nonlinear_tests {
+    use super::{Node, TreeGenotype};
+
+    #[test]
+    fn dfs_works() {
+        let arena: Vec<Node<f64>> = ["+", "*", "x", "y", "log", "x"].iter().map(|c| Node::new(c.to_string())).collect();
+        let depth: Vec<usize> = vec![ 0, 1, 2, 2, 1, 2 ];
+        let arity: Vec<usize> = vec![ 2, 2, 0, 0, 1, 0 ];
+
+        let tree: TreeGenotype<f64> = TreeGenotype { arena, depth, arity };
+
+        let results: Vec<(usize, usize)> = vec![(0, 5), (1, 3), (2, 2), (3, 3), (4, 5), (5, 5)];
+        
+        for (i, result) in results.iter().enumerate() {
+            let current_res = (i, tree.dfs(i));
+            assert_eq!(*result, current_res);
         }
-        #[test]
-        fn mutation_works() {
-            unimplemented!();
-        }
-        #[test]
-        fn crossover_works() {
-            unimplemented!();
+
+        let arena: Vec<Node<f64>> = ["+", "sin", "*", "*", "2", "pi", "x", "*", "5", "log", "*", "x", "x"].iter().map(|c| Node::new(c.to_string())).collect();
+        let depth: Vec<usize> = vec![0, 1, 2, 3, 4, 4, 3, 1, 2, 2, 3, 4, 4];
+        let arity: Vec<usize> = vec![2, 1, 2, 2, 0, 0, 0, 2, 0, 1, 2, 0, 0];
+
+        let tree: TreeGenotype<f64> = TreeGenotype { arena, depth, arity };
+
+        let results: Vec<(usize, usize)> = vec![(0, 12), (1, 6), (2, 6), (3, 5), (4, 4), (5, 5), (6, 6), (7, 12), (8, 8), (9, 12), (10, 12), (11, 11), (12, 12)];
+        for (i, result) in results.iter().enumerate() {
+            let current_res = (i, tree.dfs(i));
+            assert_eq!(*result, current_res);
         }
     }
 }
-////    pub fn init<T, R>(
-////        rng: &mut R,
-////        max_depth: usize,
-////        func_set: &OperatorSet<T>,
-////        term_set: &OperatorSet<T>,
-////        method: Method,
-////    ) -> SyntaxTree<T>
-////    where
-////        T: PartialEq + Default,
-////        R: Rng,
-////    {
-////        let mut stack: Vec<usize> = Vec::new();
-////        let mut arena: Vec<Node<T>> = Vec::new();
-////        let mut children: Vec<usize> = Vec::new();
-////
-////        let func_size: usize = func_set.len();
-////        let term_size: usize = term_set.len();
-////
-////        let is_terminal: bool = rng.gen_range(0..(term_size + func_size)) < term_size;
-////
-////        if max_depth == 0 || (method == Method::Grow && is_terminal) {
-////            let val: T = Default::default();
-////
-////            match get_random_operator(rng, term_set) {
-////                Some((label, _)) => arena.push(Node::new(label, val)),
-////                None => panic!("Something went wrong"),
-////            }
-////        } else {
-////            let val: T = Default::default();
-////
-////            match get_random_operator(rng, func_set) {
-////                Some((label, arity)) => {
-////                    arena.push(Node::new(label, val));
-////
-////                    let parent: usize = arena.len() - 1;
-////                    let child_left: usize = arena.len();
-////                    let mut child_right: usize = 0;
-////
-////                    for _ in 0..arity {
-////                        child_right = arena.len();
-////                    }
-////                }
-////                None => panic!("Something went wrong"),
-////            }
-////        }
-////
-////        let mut tree: SyntaxTree<T> = SyntaxTree::new();
-////
-////        tree
-////    }
