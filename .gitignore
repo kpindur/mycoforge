@@ -3,3 +3,6 @@ target
 
 */*.png
 */*.pdf
+
+spec
+src/other

@@ -1,12 +1,19 @@
 use rand::RngCore;
 
 use crate::genotype::init::{
-    InitUniform, InitFromDistribution
+    InitUniform, InitFromDistribution,
+    Full, Grow, RampedHalfAndHalf
 };
 
-pub enum Initialization<T> {
+pub enum Initialization<T> 
+where
+    T: Clone
+{
     Uniform(InitUniform<T>),
     FromDistribution(InitFromDistribution<T>),
+    Full(Full<T>),
+    Grow(Grow<T>),
+    RampedHalfAndHalf(RampedHalfAndHalf<T>)
 }
 
 
@@ -43,6 +50,7 @@ where
 pub trait Genotype<R, T>
 where
     R: RngCore,
+    T: Clone,
     Self: Sized
 {
     fn initialize(rng: &mut R, init_scheme: &Initialization<T>) -> Self;

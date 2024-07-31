@@ -1,0 +1,18 @@
+# Simple Commit Message Template
+
+<type>(<scope>): <short summary>
+
+# Provide a more detailed description of the change, if necessary.
+# Explain what and why, rather than how.
+<body>
+
+# Reference any relevant issues or tickets
+<footer>
+
+# Examples:
+# feat(auth): add JWT authentication
+# fix(ui): resolve issue with button alignment
+# refactor(module): split file into smaller submodules
+
+# Types: feat, fix, docs, style, refactor, perf, test, chore
+# Scope: The section of the affected codebase

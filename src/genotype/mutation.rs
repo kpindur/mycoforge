@@ -1,8 +1,12 @@
 use std::marker::PhantomData;
-
 use rand::{
     Rng, RngCore
 };
+
+use crate::genotype::genotype::operator_set_sampler::OperatorSampler;
+use crate::genotype::init::Grow;
+
+use super::genotype::{Node, TreeGenotype};
 
 /// Mutation Cookbook
 /// 
@@ -20,23 +24,149 @@ use rand::{
 /// * Mutating constants at random
 /// * Mutating constants systematically
 
+/// Inserts `subtree` into `genotype` between `mutation_point` and `subtree_end`.
+///
+/// # Arguments
+///
+/// * 'genotype' - original tree structure
+/// * `subtree` - generated tree structure to insert into `genotype`
+/// * `mutation_point` - randomly selected root node of a subtree
+/// * `subtree_end` - the end index of a tree rooted at mutation_point
+///
+/// # Returns
+///
+/// Created TreeGenotype<T> as a tuple.
+fn combine<T>(genotype: (&Vec<Node<T>>, &Vec<usize>, &Vec<usize>),
+              subtree: (&Vec<Node<T>>, &Vec<usize>, &Vec<usize>),
+              mutation_point: usize, subtree_end: usize
+             ) -> (Vec<Node<T>>, Vec<usize>, Vec<usize>)
+where
+    T: PartialEq + Clone + Default
+{
+    let (arena, depth, arity) = genotype;
+    let (o_arena, o_depth, o_arity) = subtree;
+    
+    let mut mutant = (arena[0..mutation_point].to_vec(), 
+                      depth[0..mutation_point].to_vec(), 
+                      arity[0..mutation_point].to_vec());
+    mutant.0.extend_from_slice(o_arena);
+    mutant.1.extend_from_slice(o_depth);
+    mutant.2.extend_from_slice(o_arity);
+    if subtree_end < arena.len() {
+        mutant.0.extend_from_slice(&arena[subtree_end..]);
+        mutant.1.extend_from_slice(&depth[subtree_end..]);
+        mutant.2.extend_from_slice(&arity[subtree_end..]);
+    }
+
+    return mutant;
+}
+
+/// Replace the element of `genotype` at `mutation_point` with `node`
+///
+/// # Arguments
+///
+/// * `genotype` - original tree structure
+/// * `node` - node represented as a tuple
+/// * `mutation_point` - randomly selected root node of a subtree
+///
+/// # Returns
+/// Create TreeGenotype<T> as a tuple.
+fn replace<T>(genotype: (&Vec<Node<T>>, &Vec<usize>, &Vec<usize>),
+              node: (Node<T>, usize, usize),
+              mutation_point: usize
+             ) -> (Vec<Node<T>>, Vec<usize>, Vec<usize>)
+where
+    T: PartialEq + Clone + Default
+{
+    let (mut arena, mut depth, mut arity) = (genotype.0.clone(), genotype.1.clone(), genotype.2.clone());
+    
+    arena[mutation_point] = node.0;
+    depth[mutation_point] = node.1;
+    arity[mutation_point] = node.2;
+
+    let mutant = (arena, depth, arity);
+
+    return mutant;
+}
+
+/// Calculates depth of the full binary tree from number of nodes.
+///
+/// # Arguments
+///
+/// * `no_nodes` - number of nodes of a tree
+/// * 'lower' - flag to either floor (for lower limit) or ceil (for upper limit)
+///
+/// # Returns
+///
+/// Calculated depth of the full binary tree.
+fn to_depth(no_nodes: f64, lower: bool) -> usize {
+    let no_nodes = if lower { no_nodes.floor() } else { no_nodes.ceil() };
+
+    return (((no_nodes).ceil() + 1.0).log2() - 1.0) as usize;
+}
 
 /// Subtree mutation replaces a randomly selected subtree with another randomly created subtree.
 /// Kinnear defined a similar mutation operator, but with a restriction that prevents the offspring
 /// from being more than 15% deeper than its parent.
-pub struct SubtreeMutation<T> {
+pub struct SubtreeMutation<T> 
+where
+    T: Clone
+{
     probability:    f64,
-    size_limit:     Option<usize>,
-    _marker:        PhantomData<T>
+    size_limit:     Option<f64>,
+    func_set:       OperatorSampler<T>,
+    term_set:       OperatorSampler<T>,
 }
 
-impl<T> SubtreeMutation<T> {
-    pub fn new(probability: f64, size_limit: Option<usize>) -> Self {
-        return Self { probability, size_limit, _marker: PhantomData };
+impl<T> SubtreeMutation<T> 
+where
+    T: PartialEq + Clone + Default
+{
+    pub fn new(probability: f64, size_limit: Option<f64>, 
+               func_set: OperatorSampler<T>, term_set: OperatorSampler<T>
+               ) -> Self {
+        return Self { probability, size_limit, func_set, term_set };
     }
 
-    pub fn mutate<R: RngCore>(&self, rng: &mut R, genotype: &[T]) -> Vec<T> {
-        todo!();
+    /// Mutate tree structure using stored probabilities, limits and function sets.
+    /// Selects mutation point uniformly and generates new subtree.
+    ///
+    /// # Arguments
+    ///
+    /// * `rng` - mutable random number generator
+    /// * 'genotype' - tree genotype structure
+    ///
+    /// # Returns
+    ///
+    /// Updated TreeGenotype<T>.
+    pub fn mutate<R: RngCore>(&self, rng: &mut R, genotype: &TreeGenotype<T>) -> TreeGenotype<T> {
+        let mutate = rng.gen::<f64>() < self.probability;
+        if !mutate { return genotype.clone(); }
+
+        let mutation_point = rng.gen_range(0..genotype.len());
+        let subtree_end = genotype.dfs(mutation_point);
+
+        let mut max_height: usize = 2;
+        if let Some(max_size) = self.size_limit {
+            max_height = to_depth(max_size * genotype.len() as f64, false);
+        }
+
+        let init_scheme = Grow::new(0, max_height, self.func_set.clone(), self.term_set.clone());
+
+        let mut new_subtree: Vec<(String, usize, usize)> = Vec::new();
+        init_scheme.initialize(rng, 0, &mut new_subtree);
+    
+        let (mut arena, mut depth, mut arity) = (Vec::new(), Vec::new(), Vec::new());
+        for (id, d, a) in new_subtree {
+            arena.push(Node::new(id.to_string()));
+            depth.push(d+genotype.depth(mutation_point));
+            arity.push(a);
+        }
+        let subtree: (&Vec<Node<T>>, &Vec<usize>, &Vec<usize>) = (&arena, &depth, &arity);
+        
+        let mutant = combine::<T>(genotype.get_tuple(), subtree, mutation_point, subtree_end);
+
+        return TreeGenotype::from_tuple(mutant);
     }
 }
 
@@ -47,19 +177,58 @@ impl<T> SubtreeMutation<T> {
 /// The first of these methods samples uniformly in the space of possible programs, whereas 
 /// the second samples uniformly in the space of program lengths. Experiments suggested that 
 /// there was far more bloat with the first mutation operator.
-pub struct SizeFairMutation<T> {
+pub struct SizeFairMutation<T> 
+where
+    T: Clone
+{
     probability:    f64,
-    size_limit:     Option<usize>,
-    _marker:        PhantomData<T>
+    size_limit:     bool,
+    func_set:       OperatorSampler<T>,
+    term_set:       OperatorSampler<T>,
 }
 
-impl<T> SizeFairMutation<T> {
-    pub fn new(probability: f64, size_limit: Option<usize>) -> Self {
-        return Self { probability, size_limit, _marker: PhantomData };
+impl<T> SizeFairMutation<T> 
+where
+    T: PartialEq + Clone + Default
+{
+    pub fn new(probability: f64, size_limit: bool, 
+               func_set: OperatorSampler<T>, term_set: OperatorSampler<T>
+               ) -> Self {
+        return Self { probability, size_limit, func_set, term_set };
     }
 
-    pub fn mutate<R: RngCore>(&self, rng: &mut R, genotype: &[T]) -> Vec<T> {
-        todo!();
+    pub fn mutate<R: RngCore>(&self, rng: &mut R, genotype: TreeGenotype<T>) -> TreeGenotype<T> {
+        let mutate = rng.gen::<f64>() < self.probability;
+        if !mutate { return genotype.clone(); }
+        // Subtree to substitute
+        let mutation_point = rng.gen_range(0..genotype.len());
+        let subtree_end = genotype.dfs(mutation_point);
+        // Static Limit
+        let mut min_height: usize = to_depth(genotype.len() as f64 / 2.0, true);        // NOTE: L/2
+        let mut max_height: usize = to_depth(3.0 * genotype.len() as f64 / 2.0, false); // NOTE: 3L/2
+        // Dynamic Limit
+        if self.size_limit {
+            let no_nodes = (subtree_end - mutation_point) as f64;
+
+            min_height = 0;                         // NOTE: L/2
+            max_height = to_depth(no_nodes, false); // NOTE: 3L/2
+        }
+        let init_scheme = Grow::new(min_height, max_height, self.func_set.clone(), self.term_set.clone());
+
+        let mut new_subtree: Vec<(String, usize, usize)> = Vec::new();
+        init_scheme.initialize(rng, 0, &mut new_subtree);
+    
+        let (mut arena, mut depth, mut arity) = (Vec::new(), Vec::new(), Vec::new());
+        for (id, d, a) in new_subtree {
+            arena.push(Node::new(id.to_string()));
+            depth.push(d+genotype.depth(mutation_point));
+            arity.push(a);
+        }
+        let subtree: (&Vec<Node<T>>, &Vec<usize>, &Vec<usize>) = (&arena, &depth, &arity);
+        
+        let mutant = combine::<T>(genotype.get_tuple(), subtree, mutation_point, subtree_end);
+
+        return TreeGenotype::new(mutant.0, mutant.1, mutant.2);
     }
 }
 
@@ -68,19 +237,47 @@ impl<T> SizeFairMutation<T> {
 /// flip. In GP, instead a node in the tree is randomly selected and randomly changed. To ensure
 /// the tree remains legal, the replacement node has the same number of arguments as the node it is
 /// replacing.
-pub struct PointMutation<T> {
+pub struct PointMutation<T> 
+where
+    T: Clone
+{
     probability:    f64,
-    size_limit:     Option<usize>,
-    _marker:        PhantomData<T>
+    func_set:       OperatorSampler<T>,
+    term_set:       OperatorSampler<T>,
 }
 
-impl<T> PointMutation<T> {
-    pub fn new(probability: f64, size_limit: Option<usize>) -> Self {
-        return Self { probability, size_limit, _marker: PhantomData };
+impl<T> PointMutation<T> 
+where
+    T: PartialEq + Clone + Default
+{
+    pub fn new(probability: f64, func_set: OperatorSampler<T>, term_set: OperatorSampler<T>) -> Self {
+        return Self { probability, func_set, term_set };
     }
 
-    pub fn mutate<R: RngCore>(&self, rng: &mut R, genotype: &[T]) -> Vec<T> {
-        todo!();
+    pub fn mutate<R: RngCore>(&self, rng: &mut R, genotype: TreeGenotype<T>) -> TreeGenotype<T> {
+        let mutate = rng.gen::<f64>() < self.probability;
+        if !mutate { return genotype.clone(); }
+
+        let mutation_point = rng.gen_range(0..genotype.len());
+        let (depth, arity): (&usize, &usize) = (genotype.depth(mutation_point), genotype.arity(mutation_point));
+        let mut node: Node<T> = if *arity == 0 {
+            Node::new(self.term_set.sample(rng).0)
+        } else {
+            let max_reps = 100;
+            let mut new_id: String = String::new();
+            for _ in 0..max_reps {
+                let (sampled_id, _, sampled_arity) = self.func_set.sample(rng);
+                if sampled_arity != *arity { continue; }
+                new_id = sampled_id;
+                break;
+            }
+            Node::new(new_id)
+        };
+
+        let node: (Node<T>, usize, usize) = (node, *depth,*arity);
+        let mutant = replace::<T>(genotype.get_tuple(), node, mutation_point);
+
+        return TreeGenotype::new(mutant.0, mutant.1, mutant.2);
     }
 }
 
@@ -177,6 +374,8 @@ mod linear_tests {
     use crate::genotype::mutation::UniformBinaryMutation;
     use crate::genotype::init::InitUniform;
 
+    use crate::genotype::init::{Full, Grow, RampedHalfAndHalf};
+
     use rand::{
         rngs::StdRng, 
         SeedableRng
@@ -197,5 +396,24 @@ mod linear_tests {
         let mutant: Vec<bool> = mutation_scheme.mutate(&mut rng, &individual);
         assert_ne!(individual, mutant,
         "Error: Mutant is exactly the same!");
+    }
+
+    #[test]
+    fn subtree_mutation_works() {
+        let seed: [u8; 32] = [0; 32];
+        let mut rng = StdRng::from_seed(seed);
+
+        //let init_scheme = 
+        unimplemented!()
+    }
+
+    #[test]
+    fn size_fair_mutation_works() {
+        unimplemented!()
+    }
+
+    #[test]
+    fn point_mutation_works() {
+        unimplemented!()
     }
 }
