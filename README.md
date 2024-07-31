@@ -5,10 +5,39 @@
 
 # MycoForge
 
-Initial README
+MycoForge is a Rust (another) library designed to run genetic programming experiments. 
+*(Hopefully)* It will provide a flexible set of tools and utilities to help researchers and practitioners implement, run, and analyze genetic programming algorithms with a focus on ease of use and extensibility. 
 
-## Todo:
+## Overview
+
+Genetic programming is a method of evolving computer programs to solve complex problems using principles inspired by biological evolution. 
+MycoForge aims to streamline the process of setting up genetic programming experiments, allowing users to focus on their specific research questions rather than implementation details.
+
+Key features:
+
+Nothing for the time being
+
+## Installation
+
+NON EXISTENT
+
+## Quick Start Guide
+
+## Usage Examples
+
+## Features
+
+## Documentation
+
+## Contributing Guidelines
+
+## Contact Information
+
+# Todo:
 - [ ] README
+    - [ ] Add outline
+    - [ ] Add content
+- [ ] Documentation
 - [ ] Initialization
 - [ ] Optimizers
     - [ ] GA
