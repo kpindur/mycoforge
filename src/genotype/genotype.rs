@@ -248,7 +248,7 @@ pub mod operator_set_sampler {
 
 use operator_set_sampler::OperatorSampler;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Node<T> 
 where
     T: PartialEq
@@ -261,16 +261,16 @@ impl<T> Node<T>
 where
     T: PartialEq + Default + Clone
 {
-    fn new(idx: String) -> Self {
+    pub fn new(idx: String) -> Self {
         return Self { idx, val: T::default() };
     }
 
-    fn evaluate<R: RngCore>(rng: &mut R, op_sampler: OperatorSampler<T>) -> Vec<T> {
+    pub fn evaluate<R: RngCore>(rng: &mut R, op_sampler: OperatorSampler<T>) -> Vec<T> {
         todo!()
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TreeGenotype<T> 
 where
     T: PartialEq + Default + Clone
@@ -284,8 +284,14 @@ impl<T> TreeGenotype<T>
 where
     T: PartialEq + Default + Clone
 {
-    pub fn new() -> Self {
-        return Self { arena: Vec::new(), depth: Vec::new(), arity: Vec::new() }
+    pub fn new(arena: Vec<Node<T>>, depth: Vec<usize>, arity: Vec<usize>) -> Self {
+        return Self { arena, depth, arity }
+    }
+    pub fn from_tuple(individual: (Vec<Node<T>>, Vec<usize>, Vec<usize>)) -> Self {
+        return Self { arena: individual.0, depth: individual.1, arity: individual.2 };
+    }
+    pub fn len(&self) -> usize {
+        return self.arena.len();
     }
     pub fn root(&self) -> &Node<T> {
         return self.arena.get(0).expect("Failed to get root!");
@@ -301,6 +307,9 @@ where
             0 => true,
             _ => false,
         }
+    }
+    pub fn get_tuple(&self) -> (&Vec<Node<T>>, &Vec<usize>, &Vec<usize>) {
+        return (&self.arena, &self.depth, &self.arity);
     }
 
     pub fn dfs(&self, root: usize) -> usize {
