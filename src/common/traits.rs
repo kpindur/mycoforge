@@ -1,7 +1,22 @@
 
-pub trait Genotype {
-    fn initialize(&mut self);
-    fn clone(&self) -> Box<dyn Genotype>;
+pub trait Genotype: Sized {
+    type Initializer: Initializer<Self>;
+    type Mutator: Mutator<Self>;
+    type Crossoverer: Crossoverer<Self>;
+
+    fn new(initializer: &Self::Initializer) -> Self {
+        return initializer.initialize();
+    }
+
+    fn mutate(mutator: &Self::Mutator, genotype: &Self) -> Self {
+        return mutator.variate(genotype);
+    }
+
+    fn crossover(crossoverer: &Self::Crossoverer, genotype1: &Self, genotype2: &Self) -> Self {
+        return crossoverer.variate(genotype1, genotype2);
+    }
+}
+
 pub trait Initializer<G: Genotype> {
     fn initialize(&self) -> G;
 }
