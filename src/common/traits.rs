@@ -33,15 +33,15 @@ pub trait Selector<G: Genotype> {
     fn select(&self, population: &[G]) -> G;
 }
 
-pub trait Phenotype {
+pub trait Evaluator {
     fn evaluate(&self) -> f64;
 }
 
 pub trait Individual {
     type G: Genotype;
-    type P: Phenotype;
+    type E: Evaluator;
 
     fn new(genotype: Self::G) -> Self;
     fn genotype(&self) -> &Self::G;
-    fn phenotype(&self) -> &Self::P;
+    fn phenotype(&self) -> &Self::E;
 }
