@@ -1,8 +1,6 @@
+use std::fmt::Display;
 
-pub trait Genotype {
-    fn new() -> Self;
-    // Other methods
-}
+pub trait Genotype: Clone + Display {}
 
 pub trait Initializer<G: Genotype> {
     fn initialize(&self) -> G;
