@@ -82,6 +82,7 @@ mod test {
         assert_eq!(2, internal_two.operators.len());
     }
 
+    #[test]
     fn test_operator_sampler_distribution() {
         let operators = vec!["A".to_string(), "B".to_string(), "C".to_string()];
         let arity = vec![2, 0, 0];
