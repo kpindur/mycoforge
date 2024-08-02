@@ -3,15 +3,18 @@ use std::fmt::{Display, Formatter, Result};
 
 use crate::common::traits::Genotype;
 
+#[derive(Clone)]
 pub struct TreeGenotype {
-    _arena: Vec<String>,
-    _children: HashMap<usize, Vec<usize>>,
+    arena: Vec<String>,
+    children: HashMap<usize, Vec<usize>>,
 }
 
-impl TreeGenotype {}
+impl Genotype for TreeGenotype {}
 
-impl Genotype for TreeGenotype {
-    fn new() -> Self {
+impl TreeGenotype {
+    pub fn new(arena: Vec<String>, children: HashMap<usize, Vec<usize>>) -> Self {
+        return Self { arena, children };
+    }
         todo!()
     }
 
