@@ -15,6 +15,9 @@ impl TreeGenotype {
     pub fn new(arena: Vec<String>, children: HashMap<usize, Vec<usize>>) -> Self {
         return Self { arena, children };
     }
+
+    pub fn subtree(&self, _root: usize) -> usize {
+        // Returns end point
         todo!()
     }
 
