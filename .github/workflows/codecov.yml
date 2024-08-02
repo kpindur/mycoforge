@@ -1,0 +1,7 @@
+coverage:
+  status:
+    project:
+      default:
+        paths:
+          - "src/**/*"
+          - "tree/core/**/*"
