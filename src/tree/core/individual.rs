@@ -67,6 +67,29 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_access() {
+        let mut tree = TreeGenotype {
+            arena: Vec::new(),
+            children: HashMap::new(),
+        };
+        let arena: Vec<String> = ["+", "*", "2", "x", "-1"].iter().map(|w| w.to_string()).collect();
+        let mut children: HashMap<usize, Vec<usize>> = HashMap::new();
+        children.insert(0, vec![1, 4]);
+        children.insert(1, vec![2, 3]);
+
+        for node in &arena {
+            tree.arena_mut().push(node.to_string());
+        }
+
+        for (&key, value) in children.iter() {
+            tree.children_mut().insert(key, value.clone());
+        }
+        
+        assert_eq!(tree.arena, arena);
+        assert_eq!(tree.children, children);
+    }
+
+    #[test]
     fn test_tree_display() {
         let mut tree = TreeGenotype {
             arena: vec![
