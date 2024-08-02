@@ -20,6 +20,21 @@ impl OperatorSampler {
         assert_eq!(self.weights.len(), weights.len());
         self.weights = weights;
     }
+
+    pub fn sampler_with_arity(&self, min_arity: usize, max_arity: usize) -> OperatorSampler {
+        let is_valid = |arity| -> bool {
+            return arity >= min_arity && arity <= max_arity;
+        };
+        let (mut filtered_operators, mut filtered_arity, mut filtered_weights) = (Vec::new(), Vec::new(), Vec::new());
+        for (i, &arity) in self.arity.iter().enumerate() {
+            if is_valid(arity) {
+                filtered_operators.push(self.operators[i].clone());
+                filtered_arity.push(self.arity[i]);
+                filtered_weights.push(self.weights[i]);
+            }
+        }
+        return Self { operators: filtered_operators, arity: filtered_arity, weights: filtered_weights };
+    }
 }
 
 impl Sampler for OperatorSampler {
