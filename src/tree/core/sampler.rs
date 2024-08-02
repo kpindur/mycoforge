@@ -64,6 +64,24 @@ mod test {
     }
 
     #[test]
+    fn test_sampler_with_arity() {
+        let operators: Vec<String> = ["+", "-", "sin", "x", "y", "z"].iter().map(|&w| w.to_string()).collect();
+        let arity = vec![2, 2, 1, 0, 0, 0];
+        let weights = vec![1.0 / 6.0; 6];
+
+        let sampler = OperatorSampler::new(operators, arity, weights);
+
+        let external = sampler.sampler_with_arity(0, 0);
+        let internal = sampler.sampler_with_arity(1, 2);
+        let internal_one = sampler.sampler_with_arity(1, 1);
+        let internal_two = sampler.sampler_with_arity(2, 2);
+
+        assert_eq!(3, external.operators.len());
+        assert_eq!(3, internal.operators.len());
+        assert_eq!(1, internal_one.operators.len());
+        assert_eq!(2, internal_two.operators.len());
+    }
+
     fn test_operator_sampler_distribution() {
         let operators = vec!["A".to_string(), "B".to_string(), "C".to_string()];
         let arity = vec![2, 0, 0];
