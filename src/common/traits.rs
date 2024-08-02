@@ -1,9 +1,13 @@
 use std::fmt::Display;
 
+use rand::Rng;
+
+use crate::tree::core::sampler::OperatorSampler;
+
 pub trait Genotype: Clone + Display {}
 
 pub trait Initializer<G: Genotype> {
-    fn initialize(&self) -> G;
+    fn initialize<R: Rng>(&self, rng: &mut R, sampler: OperatorSampler) -> G;
 }
 
 pub trait Mutator<G: Genotype> {
