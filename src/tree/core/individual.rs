@@ -16,6 +16,9 @@ impl TreeGenotype {
         return Self { arena, children };
     }
 
+    pub fn arena(&mut self) -> &mut Vec<String> { return &mut self.arena; }
+    pub fn children(&mut self) -> &mut HashMap<usize, Vec<usize>> { return &mut self.children; }
+
     pub fn subtree(&self, _root: usize) -> usize {
         // Returns end point
         todo!()
