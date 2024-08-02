@@ -55,5 +55,35 @@ impl Display for TreeGenotype {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tree_display() {
+        let mut tree = TreeGenotype {
+            arena: vec![
+                "+".to_string(),
+                "*".to_string(),
+                "2".to_string(),
+                "x".to_string(),
+                "-1".to_string(),
+            ],
+            children: HashMap::new(),
+        };
+        tree.children.insert(0, vec![1, 4]);
+        tree.children.insert(1, vec![2, 3]);
+
+        let expected_output = "\
++
+├── *
+│   ├── 2
+│   └── x
+└── -1
+";
+        println!("{}", tree);
+        assert_eq!(format!("{}", tree), expected_output);
+    }
 }
 
