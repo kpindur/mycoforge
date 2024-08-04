@@ -1,5 +1,7 @@
 use std::collections::HashMap;
+
 use rand::Rng;
+use rand::seq::SliceRandom;
 
 use crate::common::traits::Initializer;
 use crate::tree::core::individual::TreeGenotype;
@@ -14,8 +16,6 @@ impl Grow {
     pub fn new(min_depth: usize, max_depth: usize) -> Self {
         return Self { min_depth, max_depth };
     }
-    
-
 }
 
 impl Initializer<TreeGenotype> for Grow {
