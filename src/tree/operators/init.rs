@@ -59,3 +59,38 @@ impl Initializer<TreeGenotype> for Grow {
         return tree;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rand::rngs::StdRng;
+    use rand::SeedableRng;
+
+    fn tmp_valid_tree(tree: TreeGenotype) -> bool {
+        let mut result: usize = 0;
+        for (_, value) in tree.children() {
+            result += value.len();
+        }
+
+        if (result + 1) != tree.arena().len() {
+            return false;
+        }
+        return true;
+    }
+
+    #[test]
+    fn test_intializer_grow() {
+        let operators: Vec<String> = ["+", "-", "sin", "x", "y", "z"].iter().map(|&w| w.to_string()).collect();
+        let arity = vec![2, 2, 1, 0, 0, 0];
+        let weights = vec![1.0 / 6.0; 6];
+
+        let sampler = OperatorSampler::new(operators, arity, weights);
+        
+        let mut rng = StdRng::seed_from_u64(42);
+
+        let init_scheme = Grow::new(1, 2);
+        let tree = init_scheme.initialize(&mut rng, sampler);
+
+        assert!(tmp_valid_tree(tree));
+    }
+}
