@@ -68,7 +68,7 @@ mod tests {
 
     fn tmp_valid_tree(tree: TreeGenotype) -> bool {
         let mut result: usize = 0;
-        for (_, value) in tree.children() {
+        for value in tree.children().values() {
             result += value.len();
         }
 
