@@ -19,7 +19,7 @@ impl Grow {
 }
 
 impl Initializer<TreeGenotype> for Grow {
-    fn initialize<R: Rng>(&self, rng: &mut R, sampler: OperatorSampler) -> TreeGenotype {
+    fn initialize<R: Rng>(&self, rng: &mut R, sampler: &OperatorSampler) -> TreeGenotype {
         let mut stack: Vec<(usize, usize)> = Vec::new();
         let mut tree: TreeGenotype = TreeGenotype::new(Vec::new(), HashMap::new());
         
@@ -89,7 +89,7 @@ mod tests {
         let mut rng = StdRng::seed_from_u64(42);
 
         let init_scheme = Grow::new(1, 2);
-        let tree = init_scheme.initialize(&mut rng, sampler);
+        let tree = init_scheme.initialize(&mut rng, &sampler);
 
         assert!(tmp_valid_tree(tree));
     }

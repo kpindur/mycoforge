@@ -53,7 +53,7 @@ impl SubtreeMutation {
 }
 
 impl Mutator<TreeGenotype> for SubtreeMutation {
-    fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: OperatorSampler) -> TreeGenotype {
+    fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
         if rng.gen::<f64>() > self.probability { return individual.clone(); }
         
         let mutation_point: usize = rng.gen_range(0..individual.arena().len());
@@ -72,8 +72,27 @@ impl Mutator<TreeGenotype> for SubtreeMutation {
 
 #[cfg(test)]
 mod test {
+    use super::*;
+    use rand::rngs::StdRng;
+    use rand::SeedableRng;
+
     #[test]
     fn test_subtree_mutation() {
-        assert!(false)
+        let operators: Vec<String> = ["+", "-", "sin", "x", "y", "z"].iter().map(|&w| w.to_string()).collect();
+        let arity = vec![2, 2, 1, 0, 0, 0];
+        let weights = vec![1.0 / 6.0; 6];
+
+        let sampler = OperatorSampler::new(operators, arity, weights);
+        
+        let mut rng = StdRng::seed_from_u64(42);
+
+        let init_scheme = Grow::new(1, 2);
+        let tree = init_scheme.initialize(&mut rng, &sampler);
+        
+        let mutator = SubtreeMutation::new(1.0);
+        let mutant = mutator.variate(&mut rng, &tree, &sampler);
+
+        assert_ne!(tree.arena(), mutant.arena());
+        assert_ne!(tree.children(), mutant.children());
     }
 }

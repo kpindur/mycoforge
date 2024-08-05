@@ -7,11 +7,11 @@ use crate::tree::core::sampler::OperatorSampler;
 pub trait Genotype: Clone + Display {}
 
 pub trait Initializer<G: Genotype> {
-    fn initialize<R: Rng>(&self, rng: &mut R, sampler: OperatorSampler) -> G;
+    fn initialize<R: Rng>(&self, rng: &mut R, sampler: &OperatorSampler) -> G;
 }
 
 pub trait Mutator<G: Genotype> {
-    fn variate<R: Rng>(&self, rng: &mut R, individual: &G, sample: OperatorSampler) -> G;
+    fn variate<R: Rng>(&self, rng: &mut R, individual: &G, sample: &OperatorSampler) -> G;
 }
 
 pub trait Crossoverer<G: Genotype> {
