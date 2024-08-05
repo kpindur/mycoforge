@@ -101,6 +101,28 @@ mod tests {
     }
 
     #[test]
+    fn test_subtree() {
+        let mut tree = TreeGenotype {
+            arena: vec![
+                "+".to_string(),
+                "*".to_string(),
+                "2".to_string(),
+                "x".to_string(),
+                "-1".to_string(),
+            ],
+            children: HashMap::new(),
+        };
+        tree.children.insert(0, vec![1, 4]);
+        tree.children.insert(1, vec![2, 3]);
+        
+        assert_eq!(tree.subtree(0), 4);
+        assert_eq!(tree.subtree(1), 3);
+        assert_eq!(tree.subtree(2), 2);
+        assert_eq!(tree.subtree(3), 3);
+        assert_eq!(tree.subtree(4), 4);
+    }
+
+    #[test]
     fn test_tree_display() {
         let mut tree = TreeGenotype {
             arena: vec![
