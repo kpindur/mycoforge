@@ -11,7 +11,7 @@ pub trait Initializer<G: Genotype> {
 }
 
 pub trait Mutator<G: Genotype> {
-    fn variate(&self, individual: &G) -> G;
+    fn variate<R: Rng>(&self, rng: &mut R, individual: &G, sample: OperatorSampler) -> G;
 }
 
 pub trait Crossoverer<G: Genotype> {
