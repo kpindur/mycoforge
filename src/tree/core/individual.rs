@@ -21,9 +21,18 @@ impl TreeGenotype {
     pub fn children(&self) -> &HashMap<usize, Vec<usize>> { return &self.children; }
     pub fn children_mut(&mut self) -> &mut HashMap<usize, Vec<usize>> { return &mut self.children; }
 
-    pub fn subtree(&self, _root: usize) -> usize {
-        // Returns end point
-        todo!()
+    pub fn subtree(&self, root: usize) -> usize {
+        let mut stack = vec![root];
+        let mut last_visited = root;
+        
+        while let Some(index) = stack.pop() {
+            if index > last_visited { last_visited = index; }
+            if let Some(children) = self.children.get(&index) {
+                for child in children { stack.push(*child); }
+            }
+        }
+
+        return last_visited;
     }
 
     fn fmt_node(&self, f: &mut Formatter<'_>, node_index: usize, prefix: &str, child_prefix: &str) -> Result {
