@@ -124,6 +124,10 @@ mod tests {
 
     #[test]
     fn test_tree_display() {
+        let tree = TreeGenotype::new(Vec::new(), HashMap::new());
+
+        println!("{}", tree);
+
         let mut tree = TreeGenotype {
             arena: vec![
                 "+".to_string(),
