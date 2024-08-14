@@ -11,11 +11,11 @@ pub trait Initializer<G: Genotype> {
 }
 
 pub trait Mutator<G: Genotype> {
-    fn variate<R: Rng>(&self, rng: &mut R, individual: &G, sample: &OperatorSampler) -> G;
+    fn variate<R: Rng>(&self, rng: &mut R, individual: &G, sampler: &OperatorSampler) -> G;
 }
 
 pub trait Crossoverer<G: Genotype> {
-    fn variate(&self, parent1: &G, parent2: &G) -> G;
+    fn variate<R: Rng>(&self, rng: &mut R, parent1: &G, parent2: &G, sampler: &OperatorSampler) -> Vec<G>;
 }
 
 pub trait Selector<G: Genotype> {
