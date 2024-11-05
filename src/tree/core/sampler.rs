@@ -16,6 +16,9 @@ impl OperatorSampler {
         return Self { operators, arity, weights };
     }
 
+    pub fn operators(&self) -> &Vec<String> { return &self.operators; }
+    pub fn arities(&self) -> &Vec<usize> { return &self.arity; }
+
     pub fn update_weights(&mut self, weights: Vec<f64>) {
         assert_eq!(self.weights.len(), weights.len());
         self.weights = weights;
