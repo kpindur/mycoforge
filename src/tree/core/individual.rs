@@ -35,6 +35,31 @@ impl TreeGenotype {
         return last_visited;
     }
 
+    pub fn construct_children(&self, sampler: &OperatorSampler) -> HashMap<usize, Vec<usize>> {
+        let mut children = HashMap::new();
+        let operators = sampler.operators();
+        let arities = sampler.arities();
+
+        let mut stack = vec![0]; // Stack of nodes to generate children for
+        let mut current = 0;
+
+        while let Some(parent) = stack.pop() {
+            if let Some(op_idx) = operators.iter().position(|op| *op == operators[current]) {
+                let arity = arities[op_idx];
+                if arity == 0 { continue; }
+                for _ in 0..arity {
+                    stack.push(current);
+                }
+            }
+            children.entry(parent)
+                .or_insert(vec![current])
+                .push(current);
+            current += 1;
+        }
+
+        return children;
+    }
+
     fn fmt_node(&self, f: &mut Formatter<'_>, node_index: usize, prefix: &str, child_prefix: &str) -> Result {
         writeln!(f, "{}{}", prefix, self.arena[node_index])?;
 
