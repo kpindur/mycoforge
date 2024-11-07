@@ -17,38 +17,14 @@ impl SubtreeMutation {
     }
 
     fn substitute(individual: &TreeGenotype, subtree: &TreeGenotype, mutation_point: usize) 
-        -> (Vec<String>, HashMap<usize, Vec<usize>>) {
+        -> Vec<String> {
         let mutation_end: usize = individual.subtree(mutation_point);
-        let size_diff: i32 = (mutation_end - mutation_point) as i32 
-                            - subtree.arena().len() as i32;
-
-        let mut new_children = HashMap::new();
-        for (&key, value) in individual.children() {
-            if key >= mutation_point && key < mutation_end { continue; }
-            
-            let new_key = if key > mutation_end {
-                (key as i32 + size_diff) as usize
-            } else { key };
-            
-            let new_values = if key > mutation_end { 
-                value.iter()
-                    .map(|&v| (v as i32 + size_diff) as usize)
-                    .collect::<Vec<usize>>() 
-            } else { value.clone() };
-
-            if !new_values.is_empty() { new_children.insert(new_key, new_values); }
-        }
 
         let mut new_arena = individual.arena()[0..mutation_point].to_vec();
         new_arena.extend(subtree.arena().iter().cloned());
         new_arena.extend(individual.arena()[mutation_end+1..].iter().cloned());
-        
-        for (key, value) in subtree.children() {
-            new_children.insert(key + mutation_point, 
-                value.iter().map(|&v| v + mutation_point).collect());
-        }
 
-        return (new_arena, new_children);
+        return new_arena;
     }
 }
 
@@ -61,10 +37,9 @@ impl Mutator<TreeGenotype> for SubtreeMutation {
         let init_scheme = Grow::new(0, 2);
         let subtree: TreeGenotype = init_scheme.initialize(rng, sampler);
         
-        let tree = 
-            SubtreeMutation::substitute(individual, &subtree, mutation_point);
-        
-        let tree = TreeGenotype::new(tree.0, tree.1);
+        let arena = Self::substitute(individual, &subtree, mutation_point);
+        let mut tree = TreeGenotype::with_arena(arena);
+        *tree.children_mut() = tree.construct_children(sampler);
 
         return tree.clone();
     }
