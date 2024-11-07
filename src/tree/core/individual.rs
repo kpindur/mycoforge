@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fmt::{Display, Formatter, Result};
 
 use crate::common::traits::Genotype;
+use crate::tree::core::sampler::OperatorSampler;
 
 #[derive(Clone)]
 pub struct TreeGenotype {
@@ -162,7 +163,7 @@ mod tests {
         children.insert(0, vec![1, 4]);
         children.insert(1, vec![2, 3]);
         
-        let tree = TreeGenotype::new(arena.clone(), children);
+        let tree = TreeGenotype::with_arena(arena.clone());
 
         let mut test_tree = TreeGenotype { arena, children: HashMap::new() };
         *test_tree.children_mut() = test_tree.construct_children(&sampler);
