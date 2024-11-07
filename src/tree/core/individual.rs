@@ -149,9 +149,6 @@ mod tests {
 
     #[test]
     fn test_construct_children() {
-        use rand::SeedableRng;
-        use rand::rngs::StdRng;
-
         let operators: Vec<String> = ["+", "-", "sin", "x", "y", "z"].iter().map(|&w| w.to_string()).collect();
         let arity = vec![2, 2, 1, 0, 0, 0];
         let weights = vec![1.0 / 6.0; 6];
