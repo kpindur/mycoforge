@@ -12,9 +12,8 @@ pub struct TreeGenotype {
 impl Genotype for TreeGenotype {}
 
 impl TreeGenotype {
-    pub fn new(arena: Vec<String>, children: HashMap<usize, Vec<usize>>) -> Self {
-        return Self { arena, children };
-    }
+    pub fn new(arena: Vec<String>, children: HashMap<usize, Vec<usize>>) -> Self { return Self { arena, children }; }
+    pub fn with_arena(arena: Vec<String>) -> Self { return Self { arena, children: HashMap::new() }; }
 
     pub fn arena(&self) -> &Vec<String> { return &self.arena; }
     pub fn arena_mut(&mut self) -> &mut Vec<String> { return &mut self.arena; }
