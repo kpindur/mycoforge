@@ -59,11 +59,34 @@ impl Crossoverer<TreeGenotype> for SubtreeCrossover {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::common::traits::Initializer;
+    use crate::tree::operators::init::Grow;
     use rand::rngs::StdRng;
     use rand::SeedableRng;
 
     #[test]
-    fn test_subtree_mutation() {
-        todo!()
+    fn test_subtree_crossover() {
+        let operators: Vec<String> = ["+", "-", "sin", "x", "y", "z"].iter().map(|&w| w.to_string()).collect();
+        let arity = vec![2, 2, 1, 0, 0, 0];
+        let weights = vec![1.0 / 6.0; 6];
+
+        let sampler = OperatorSampler::new(operators, arity, weights);
+        
+        let mut rng = StdRng::seed_from_u64(42);
+
+        let init_scheme = Grow::new(2, 4);
+        let parent1 = init_scheme.initialize(&mut rng, &sampler);
+        let parent2 = init_scheme.initialize(&mut rng, &sampler);
+        
+        let crossover = SubtreeCrossover::new(1.0);
+        let children = crossover.variate(&mut rng, &parent1, &parent2, &sampler);
+
+        assert_ne!(parent1.arena(), children[0].arena());
+        assert!(!children[0].children().is_empty());
+        assert_ne!(parent1.children(), children[0].children());
+        
+        assert_ne!(parent2.arena(), children[1].arena());
+        assert!(!children[1].children().is_empty());
+        assert_ne!(parent2.children(), children[1].children());
     }
 }
