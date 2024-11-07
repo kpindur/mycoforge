@@ -44,19 +44,22 @@ impl TreeGenotype {
         let mut current = 0;
 
         while let Some(parent) = stack.pop() {
-            if let Some(op_idx) = operators.iter().position(|op| *op == operators[current]) {
+            if parent != current {
+                children.entry(parent)
+                    .and_modify(|vec: &mut Vec<usize>| vec.push(current))
+                    .or_insert(vec![current]);
+            }
+
+            if let Some(op_idx) = operators.iter().position(|op| *op == self.arena()[current]) {
                 let arity = arities[op_idx];
-                if arity == 0 { continue; }
-                for _ in 0..arity {
-                    stack.push(current);
+                if arity > 0 { 
+                    for _ in 0..arity {
+                        stack.push(current);
+                    }
                 }
             }
-            children.entry(parent)
-                .or_insert(vec![current])
-                .push(current);
             current += 1;
         }
-
         return children;
     }
 
