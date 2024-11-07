@@ -148,6 +148,32 @@ mod tests {
     }
 
     #[test]
+    fn test_construct_children() {
+        use rand::SeedableRng;
+        use rand::rngs::StdRng;
+
+        let operators: Vec<String> = ["+", "-", "sin", "x", "y", "z"].iter().map(|&w| w.to_string()).collect();
+        let arity = vec![2, 2, 1, 0, 0, 0];
+        let weights = vec![1.0 / 6.0; 6];
+
+        let sampler = OperatorSampler::new(operators, arity, weights);
+        
+        let arena: Vec<String> = ["+", "*", "2", "x", "-1"].iter().map(|w| w.to_string()).collect();
+        let mut children: HashMap<usize, Vec<usize>> = HashMap::new();
+        children.insert(0, vec![1, 4]);
+        children.insert(1, vec![2, 3]);
+        
+        let tree = TreeGenotype::new(arena.clone(), children);
+
+        let mut test_tree = TreeGenotype { arena, children: HashMap::new() };
+        *test_tree.children_mut() = test_tree.construct_children(&sampler);
+
+        assert_eq!(tree.arena, test_tree.arena);
+        assert!(!test_tree.children().is_empty());
+        assert_ne!(tree.children(), test_tree.children());
+    }
+
+    #[test]
     fn test_tree_display() {
         let tree = TreeGenotype::new(Vec::new(), HashMap::new());
 
