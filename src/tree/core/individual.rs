@@ -174,6 +174,38 @@ mod tests {
     }
 
     #[test]
+    fn test_construct_children2() {
+        let operators: Vec<String> = ["+", "-", "sin", "x", "y", "z"].iter().map(|&w| w.to_string()).collect();
+        let arity = vec![2, 2, 1, 0, 0, 0];
+        let weights = vec![1.0 / 6.0; 6];
+
+        let sampler = OperatorSampler::new(operators, arity, weights);
+        
+        let arena: Vec<String> = ["-", "-", "-", "y", "sin", "y", "z", "-", "sin", "+", "x", "y", "y"].iter()
+            .map(|w| w.to_string()).collect();
+        let mut children: HashMap<usize, Vec<usize>> = HashMap::new();
+        children.insert(0, vec![1, 7]);
+        children.insert(1, vec![2, 6]);
+        children.insert(2, vec![3, 4]);
+        children.insert(4, vec![5]);
+        children.insert(7, vec![8, 12]);
+        children.insert(8, vec![9]);
+        children.insert(9, vec![10, 11]);
+        
+        let tree = TreeGenotype::new(arena.clone(), children.clone());
+
+        let mut test_tree = TreeGenotype::with_arena(arena);
+        *test_tree.children_mut() = test_tree.construct_children(&sampler);
+        
+        println!("{:?}", test_tree.arena());
+        println!("{:?}", test_tree.children());
+
+        assert_eq!(tree.arena, test_tree.arena);
+        assert!(!test_tree.children().is_empty());
+        assert_eq!(tree.children(), test_tree.children());
+    }
+
+    #[test]
     fn test_tree_display() {
         let tree = TreeGenotype::new(Vec::new(), HashMap::new());
 
