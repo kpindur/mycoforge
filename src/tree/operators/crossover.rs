@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use rand::Rng;
 
 use crate::common::traits::Crossoverer;
