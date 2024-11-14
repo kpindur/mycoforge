@@ -66,6 +66,7 @@ mod test {
         let mutant = mutator.variate(&mut rng, &tree, &sampler);
 
         assert_ne!(tree.arena(), mutant.arena());
+        assert!(!mutant.children().is_empty());
         assert_ne!(tree.children(), mutant.children());
     }
 }
