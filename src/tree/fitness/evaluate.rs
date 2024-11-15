@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::common::traits::Data;
-use crate::{common::traits::Evaluator, tree::core::individual::TreeGenotype};
+use crate::{common::traits::Evaluator, tree::core::tree::TreeGenotype};
 use crate::tree::fitness::dataset::Dataset;
 
 //Mean Squared Error (MSE) - most popular
@@ -60,7 +60,7 @@ pub mod test {
     #[test]
     fn test_mse() {
         use std::collections::HashMap;
-        use crate::tree::core::individual::TreeGenotype;
+        use crate::tree::core::tree::TreeGenotype;
         use crate::tree::core::sampler::OperatorSampler;
 
         fn add(args: &[&[f64]]) -> Vec<f64> {

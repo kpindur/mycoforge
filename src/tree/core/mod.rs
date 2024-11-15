@@ -1,3 +1,3 @@
 pub mod sampler;
 
-pub mod individual;
+pub mod tree;

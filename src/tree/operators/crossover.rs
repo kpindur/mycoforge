@@ -1,7 +1,7 @@
 use rand::Rng;
 
 use crate::common::traits::Crossoverer;
-use crate::tree::core::{individual::TreeGenotype, sampler::OperatorSampler};
+use crate::tree::core::{tree::TreeGenotype, sampler::OperatorSampler};
 
 pub struct SubtreeCrossover {
     probability: f64,

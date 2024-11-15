@@ -4,7 +4,7 @@ use rand::Rng;
 use rand::seq::SliceRandom;
 
 use crate::common::traits::Initializer;
-use crate::tree::core::individual::TreeGenotype;
+use crate::tree::core::tree::TreeGenotype;
 use crate::tree::core::sampler::{OperatorSampler, Sampler};
 
 pub struct Grow {
