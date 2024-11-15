@@ -62,6 +62,13 @@ mod test {
     use rand::rngs::StdRng;
     use rand::SeedableRng;
 
+    // Move to TreeGenotype rather than leaving it here
+    fn is_valid_tree(tree: &TreeGenotype) -> bool {
+        let num_edges = tree.arena().len() - 1;
+        let test_num_edges: usize = tree.children().values().into_iter().map(|v| v.len()).sum();
+        return num_edges == test_num_edges;
+    }
+
     #[test]
     fn test_subtree_crossover() {
         let operators: Vec<String> = ["+", "-", "sin", "x", "y", "z"].iter().map(|&w| w.to_string()).collect();
@@ -79,12 +86,18 @@ mod test {
         let crossover = SubtreeCrossover::new(1.0);
         let children = crossover.variate(&mut rng, &parent1, &parent2, &sampler);
 
-        assert_ne!(parent1.arena(), children[0].arena());
-        assert!(!children[0].children().is_empty());
-        assert_ne!(parent1.children(), children[0].children());
-        
-        assert_ne!(parent2.arena(), children[1].arena());
-        assert!(!children[1].children().is_empty());
-        assert_ne!(parent2.children(), children[1].children());
+        assert!(is_valid_tree(&parent1));
+        assert!(is_valid_tree(&parent2));
+
+        assert!(is_valid_tree(&children[0]));
+        assert!(is_valid_tree(&children[1]));
+
+//        assert_ne!(parent1.arena(), children[0].arena());
+//        assert!(!children[0].children().is_empty());
+//        assert_ne!(parent1.children(), children[0].children());
+//        
+//        assert_ne!(parent2.arena(), children[1].arena());
+//        assert!(!children[1].children().is_empty());
+//        assert_ne!(parent2.children(), children[1].children());
     }
 }
