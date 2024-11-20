@@ -51,6 +51,5 @@ mod test {
         let selection = TournamentSelection::new(5);
         let chosen = selection.select(&mut rng, &population);
         println!("{}", chosen);
-        assert!(false);
     }
 }
