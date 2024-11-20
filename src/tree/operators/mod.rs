@@ -2,4 +2,4 @@ pub mod init;
 
 pub mod mutation;
 pub mod crossover;
-//pub mod select;
+pub mod select;
