@@ -61,7 +61,6 @@ pub mod test {
     fn test_mse() {
         use std::collections::HashMap;
         use crate::tree::core::tree::TreeGenotype;
-        use crate::tree::core::sampler::OperatorSampler;
 
         fn add(args: &[&[f64]]) -> Vec<f64> {
             if args.len() != 2 || args[0].is_empty() || args[1].is_empty() { return Vec::new(); }
@@ -95,9 +94,6 @@ pub mod test {
 
         let operators: Vec<String> = ["+", "-", "*","sin", "x"].iter().map(|&w| w.to_string()).collect();
         let arity = vec![2, 2, 2, 1, 0];
-        let weights = vec![1.0 / 5.0; 5];
-
-        let sampler = OperatorSampler::new(operators.clone(), arity.clone(), weights);
         
         let arena: Vec<String> = ["+", "*", "x", "x", "x"].iter().map(|w| w.to_string()).collect();
         let mut children: HashMap<usize, Vec<usize>> = HashMap::new();
