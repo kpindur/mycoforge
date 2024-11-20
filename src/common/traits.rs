@@ -31,14 +31,16 @@ pub trait Evaluator<G: Genotype> {
 }
 
 pub trait Selector<G: Genotype> {
-    fn select(&self, population: &[G]) -> G;
+    type I: Individual<G>;
+
+    fn select<R: Rng>(&self, rng: &mut R, population: &[Self::I]) -> G;
 }
 
-
-pub trait Individual {
-    type G: Genotype;
-
-    fn new(genotype: Self::G) -> Self;
-    fn genotype(&self) -> &Self::G;
+pub trait Individual<G: Genotype>: Sized {
+    fn genotype(&self) -> &G;
     fn phenotype(&self) -> f64;
+
+    fn from_vecs(genotypes: &[G], fitness: &[f64]) -> Vec<Self>;
+    fn from_genotype_vec(genotypes: &[G]) -> Vec<Self>;
+    fn to_genotype_vec(individuals: &[Self]) -> Vec<G>;
 }
