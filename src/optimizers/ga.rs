@@ -314,4 +314,77 @@ pub mod tests {
             }
         };
     }
+
+    #[test]
+    fn test_optimize_works() {
+
+        fn is_valid_tree(tree: &TreeGenotype) -> bool {
+            let num_edges = tree.arena().len() - 1;
+            let test_num_edges: usize = tree.children().values().into_iter().map(|v| v.len()).sum();
+            return num_edges == test_num_edges;
+        }
+
+        let ea = ea_components! {
+            genotype: TreeGenotype,
+            individual: TreeIndividual<TreeGenotype>,
+            components: {
+                init: Grow,
+                mutation: SubtreeMutation,
+                crossover: SubtreeCrossover,
+                evaluation: MeanSquared,
+                selection: TournamentSelection
+            },
+            operators: {
+                "+" => (add, 2, 0.2),
+                "-" => (sub, 2, 0.2),
+                "*" => (mul, 2, 0.2),
+                "sin" => (sin, 1, 0.2),
+                "x" => (x, 0, 0.2)
+            },
+            config: {
+                init: Grow::new(2, 4),
+                mutation: SubtreeMutation::new(0.1),
+                crossover: SubtreeCrossover::new(0.9),
+                evaluation: MeanSquared::new(),
+                selection: TournamentSelection::new(5)
+            }
+        };
+        let feature_names = ["x"].iter().map(|&s| s.to_string()).collect::<Vec<String>>();
+        let no_dims = 2;
+        let xs: Vec<f64> = vec![0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+        let ys = xs.iter().map(|&v| v.powi(2) + v ).collect::<Vec<f64>>();
+        let test_data = vec![xs, ys];
+
+        let data = Dataset::new(feature_names, no_dims, test_data.clone(), test_data);
+
+        let mut rng = StdRng::seed_from_u64(42);
+        
+        let population_size = 500;
+        let initial_population = ea.init_population(&mut rng, population_size);
+        let fitnesses = initial_population.iter().map(|ind| ea.evaluator().evaluate(ind, &data, ea.map())).collect::<Vec<f64>>();
+
+        let population = TreeIndividual::from_vecs(&initial_population, &fitnesses);
+
+        assert_eq!(population.len(), population_size);
+        assert!(population.iter().all(|ind| is_valid_tree(ind.genotype())));
+        
+        for ind in &population {
+            let fitness = ea.evaluator().evaluate(ind.genotype(), &data, ea.map());
+            assert!(fitness.is_finite());
+        }
+
+        let next_population = ea.optimize(&mut rng, &population);
+
+        assert_eq!(next_population.len(), population_size);
+        assert!(next_population.iter().all(|ind| is_valid_tree(ind)));
+        
+        let mut number_of_changes = 0;
+        for mutant in &next_population {
+            for ind in &initial_population {
+                if mutant.arena() == ind.arena() { continue; }
+                number_of_changes += 1;
+            }
+        }
+        assert_ne!(0, number_of_changes);
+    }
 }
