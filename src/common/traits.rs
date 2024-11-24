@@ -44,3 +44,9 @@ pub trait Individual<G: Genotype>: Sized {
     fn from_genotype_vec(genotypes: &[G]) -> Vec<Self>;
     fn to_genotype_vec(individuals: &[Self]) -> Vec<G>;
 }
+
+pub trait Optimizer<G: Genotype> {
+    type I: Individual<G>;
+    fn init_population<R: Rng>(&self, rng: &mut R, population_size: usize) -> Vec<G>;
+    fn optimize<R: Rng>(&self, rng: &mut R, population: &[Self::I]) -> Vec<G>;
+}
