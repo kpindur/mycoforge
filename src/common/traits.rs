@@ -27,7 +27,7 @@ pub trait Data {
 pub trait Evaluator<G: Genotype> {
     type D: Data;
 
-    fn evaluate(&self, tree: &G, data: &Self::D, map: HashMap<String, (usize, fn(&[&[f64]])-> Vec<f64>)>) -> f64;
+    fn evaluate(&self, tree: &G, data: &Self::D, map: &HashMap<String, (usize, fn(&[&[f64]])-> Vec<f64>)>) -> f64;
 }
 
 pub trait Selector<G: Genotype> {

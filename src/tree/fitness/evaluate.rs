@@ -17,7 +17,7 @@ impl MeanSquared {
 impl Evaluator<TreeGenotype> for MeanSquared {
     type D = Dataset;
 
-    fn evaluate(&self, tree: &TreeGenotype, data: &Self::D, map: HashMap<String, (usize, fn(&[&[f64]])-> Vec<f64>)>) -> f64 {
+    fn evaluate(&self, tree: &TreeGenotype, data: &Self::D, map: &HashMap<String, (usize, fn(&[&[f64]])-> Vec<f64>)>) -> f64 {
         let mut stack: Vec<Vec<f64>> = Vec::new();
 
         for i in (0..tree.arena().len()).rev() {
@@ -116,7 +116,7 @@ pub mod test {
 
         let metric = MeanSquared::new();
 
-        let result = metric.evaluate(&tree, &data, map);
+        let result = metric.evaluate(&tree, &data, &map);
 
         assert_eq!(0.0, result);
     }
