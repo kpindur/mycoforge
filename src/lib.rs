@@ -11,3 +11,5 @@ pub mod tree;
 //pub mod utils;
 
 //pub mod population;
+
+pub mod optimizers;
