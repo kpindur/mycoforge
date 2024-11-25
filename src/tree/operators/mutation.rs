@@ -1,7 +1,8 @@
 use rand::Rng;
 
 use crate::common::traits::{Initializer, Mutator};
-use crate::tree::core::{tree::TreeGenotype, sampler::OperatorSampler};
+use crate::tree::core::{tree::TreeGenotype};
+use crate::operators::sampler::OperatorSampler;
 
 use super::init::Grow;
 

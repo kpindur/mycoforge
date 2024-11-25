@@ -1,5 +1,7 @@
 pub mod common;
 
+pub mod operators;
+
 //pub mod linear;
 
 pub mod tree;

@@ -3,7 +3,7 @@ use std::fmt::Display;
 use rand::Rng;
 use std::collections::HashMap;
 
-use crate::tree::core::sampler::OperatorSampler;
+use crate::operators::sampler::OperatorSampler;
 
 pub trait Genotype: Clone + Display {}
 

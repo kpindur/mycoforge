@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use rand::Rng;
 
 use crate::common::traits::{Crossoverer, Evaluator, Genotype, Individual, Initializer, Mutator, Optimizer, Selector};
-use crate::tree::core::sampler::OperatorSampler;
+use crate::operators::sampler::OperatorSampler;
 
 pub trait EAComponents<G: Genotype> {
     type I: Individual<G>;
@@ -217,7 +217,8 @@ pub mod tests {
     use rand::{rngs::StdRng, SeedableRng};
 
     use super::*;
-    use crate::tree::{core::{individual::TreeIndividual, sampler::OperatorSampler, tree::TreeGenotype}, fitness::evaluate::MeanSquared, operators::{crossover::SubtreeCrossover, init::Grow, mutation::SubtreeMutation, select::TournamentSelection}};
+    use crate::operators::sampler::OperatorSampler;
+    use crate::tree::{core::{individual::TreeIndividual,  tree::TreeGenotype}, fitness::evaluate::MeanSquared, operators::{crossover::SubtreeCrossover, init::Grow, mutation::SubtreeMutation, select::TournamentSelection}};
     use crate::tree::fitness::dataset::Dataset;
 
     fn add(args: &[&[f64]]) -> Vec<f64> {

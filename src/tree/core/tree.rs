@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fmt::{Display, Formatter, Result};
 
 use crate::common::traits::Genotype;
-use crate::tree::core::sampler::OperatorSampler;
+use crate::operators::sampler::OperatorSampler;
 
 #[derive(Clone)]
 pub struct TreeGenotype {

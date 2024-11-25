@@ -5,7 +5,7 @@ use rand::seq::SliceRandom;
 
 use crate::common::traits::Initializer;
 use crate::tree::core::tree::TreeGenotype;
-use crate::tree::core::sampler::{OperatorSampler, Sampler};
+use crate::operators::sampler::{OperatorSampler, Sampler};
 
 pub struct Grow {
     min_depth: usize,

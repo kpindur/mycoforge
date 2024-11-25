@@ -26,7 +26,7 @@ mod test {
     use super::*;
     use crate::common::traits::Initializer;
     use crate::tree::operators::init::Grow;
-    use crate::tree::core::sampler::OperatorSampler;
+    use crate::operators::sampler::OperatorSampler;
     use rand::rngs::StdRng;
     use rand::SeedableRng;
 
