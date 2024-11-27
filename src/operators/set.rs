@@ -1,3 +1,8 @@
+use rand::Rng;
+use std::collections::HashMap;
+
+use crate::operators::sampler::{OperatorSampler, Sampler};
+
 type VectorFunction = fn(&[&[f64]]) -> Vec<f64>;
 
 pub trait OperatorSet {
