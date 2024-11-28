@@ -4,6 +4,7 @@ use rand::seq::index::sample;
 use std::collections::HashSet;
 
 use crate::common::traits::Data;
+use crate::dataset::error::DatasetError;
 
 //enum TrainSelection {
 //    Random,
