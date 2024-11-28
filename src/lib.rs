@@ -2,6 +2,8 @@ pub mod common;
 
 pub mod operators;
 
+pub mod dataset;
+
 //pub mod linear;
 
 pub mod tree;

@@ -219,7 +219,7 @@ pub mod tests {
     use super::*;
     use crate::operators::sampler::OperatorSampler;
     use crate::tree::{core::{individual::TreeIndividual,  tree::TreeGenotype}, fitness::evaluate::MeanSquared, operators::{crossover::SubtreeCrossover, init::Grow, mutation::SubtreeMutation, select::TournamentSelection}};
-    use crate::tree::fitness::dataset::Dataset;
+    use crate::dataset::dataset::Dataset;
 
     fn add(args: &[&[f64]]) -> Vec<f64> {
         if args.len() != 2 || args[0].is_empty() || args[1].is_empty() { return Vec::new(); }

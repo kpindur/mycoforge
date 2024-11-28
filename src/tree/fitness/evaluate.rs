@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::common::traits::Data;
 use crate::{common::traits::Evaluator, tree::core::tree::TreeGenotype};
-use crate::tree::fitness::dataset::Dataset;
+use crate::dataset::dataset::Dataset;
 
 //Mean Squared Error (MSE) - most popular
 //Root Mean Squared Error (RMSE)
@@ -55,7 +55,7 @@ impl Evaluator<TreeGenotype> for MeanSquared {
 
 #[cfg(test)]
 pub mod test {
-    use crate::{common::traits::Evaluator, tree::fitness::{dataset::Dataset, evaluate::MeanSquared}};
+    use super::*;
 
     #[test]
     fn test_mse() {
