@@ -6,6 +6,8 @@ use std::collections::HashSet;
 use crate::common::traits::Data;
 use crate::dataset::error::DatasetError;
 
+use super::loaders::csv_loader::load_csv;
+
 //enum TrainSelection {
 //    Random,
 //    Systematic,
@@ -22,6 +24,12 @@ pub struct Dataset {
 impl Dataset {
     pub fn new(feature_names: Vec<String>, no_dims: usize, test_data: Vec<Vec<f64>>, train_data: Vec<Vec<f64>>) -> Self {
         return Self { feature_names, no_dims, test_data, train_data }
+    }
+
+    pub fn from_csv<R: Rng>(rng: &mut R, path: &str, test_ratio: f64) -> Result<Self, DatasetError> {
+        let (header, columns) = load_csv(path.as_ref())?;
+
+        return Ok(Self::from_vector(rng, header, columns, test_ratio));
     }
 
     pub fn from_vector<R: Rng>(rng: &mut R, feature_names: Vec<String>, vectors: Vec<Vec<f64>>, test_ratio: f64) -> Self {
