@@ -6,10 +6,17 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+criterion = "0.5.1"
 csv = "1.3.1"
 env_logger = "0.11.3"
 log = "0.4.21"
+proptest = "1.5.0"
 rand = "*"
+rstest = "0.23.0"
 
 [lints.clippy]
 redundant_return = "allow"
+
+[[bench]]
+name = "symbolic_regression"
+harness = false
