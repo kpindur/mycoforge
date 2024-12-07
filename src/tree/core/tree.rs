@@ -31,7 +31,6 @@ impl TreeGenotype {
                 for child in children { stack.push(*child); }
             }
         }
-
         return last_visited;
     }
 
@@ -85,7 +84,6 @@ impl TreeGenotype {
                 self.fmt_node(f, child_index, &new_prefix, &new_child_prefix)?;
             }
         }
-
         return Ok(());
     }
 }
@@ -95,9 +93,8 @@ impl Display for TreeGenotype {
         if self.arena.is_empty() {
             return Ok(());
         }
-
         self.fmt_node(f, 0, "", "")?;
-        Ok(())
+        return Ok(());
     }
 }
 
