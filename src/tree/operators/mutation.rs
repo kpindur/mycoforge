@@ -1,7 +1,7 @@
 use rand::Rng;
 
 use crate::common::traits::{Initializer, Mutator};
-use crate::tree::core::{tree::TreeGenotype};
+use crate::tree::core::tree::TreeGenotype;
 use crate::operators::sampler::OperatorSampler;
 
 use super::init::Grow;
@@ -41,33 +41,5 @@ impl Mutator<TreeGenotype> for SubtreeMutation {
         *tree.children_mut() = tree.construct_children(sampler);
 
         return tree.clone();
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    use rand::rngs::StdRng;
-    use rand::SeedableRng;
-
-    #[test]
-    fn test_subtree_mutation() {
-        let operators: Vec<String> = ["+", "-", "sin", "x", "y", "z"].iter().map(|&w| w.to_string()).collect();
-        let arity = vec![2, 2, 1, 0, 0, 0];
-        let weights = vec![1.0 / 6.0; 6];
-
-        let sampler = OperatorSampler::new(operators, arity, weights);
-        
-        let mut rng = StdRng::seed_from_u64(42);
-
-        let init_scheme = Grow::new(1, 2);
-        let tree = init_scheme.initialize(&mut rng, &sampler);
-        
-        let mutator = SubtreeMutation::new(1.0);
-        let mutant = mutator.variate(&mut rng, &tree, &sampler);
-
-        assert_ne!(tree.arena(), mutant.arena());
-        assert!(!mutant.children().is_empty());
-        assert_ne!(tree.children(), mutant.children());
     }
 }

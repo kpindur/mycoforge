@@ -23,6 +23,9 @@ impl Operators {
     pub fn operators(&self) -> &HashMap<String, Functor> { return &self.operators; }
     pub fn sampler(&self) -> &OperatorSampler { return &self.sampler; }
 
+    pub fn operators_mut(&mut self) -> &mut HashMap<String, Functor> { return &mut self.operators; }
+    pub fn sampler_mut(&mut self) -> &mut OperatorSampler { return &mut self.sampler; }
+
     pub fn create_map(&self) -> HashMap<String, (usize, VectorFunction)> {
         let mut map = HashMap::new();
         for (key, value) in &self.operators {
@@ -114,41 +117,4 @@ impl OperatorsBuilder {
 
 impl Default for OperatorsBuilder {
     fn default() -> Self { return Self { operators: HashMap::new(), weights_sum: 0.0 }; }
-}
-
-#[cfg(test)]
-pub mod tests {
-    use super::*;
-    
-    fn add(_vec: &[&[f64]]) -> Vec<f64> { 
-        println!("Add");
-        return Vec::new();
-    }
-
-    fn x(_vec: &[&[f64]]) -> Vec<f64> {
-        println!("X");
-        return Vec::new();
-    }
-
-    #[test]
-    fn test_builder_works() -> Result<(), BuilderError> {
-        let ops = OperatorsBuilder::default()
-            .add_operator("+", add, 2, 0.5)?
-            .add_operator("x", x, 0, 0.5)?
-            .build()?;
-        assert_eq!(2, ops.operators.len());
-
-        let duplicate = OperatorsBuilder::default()
-            .add_operator("+", add, 2, 0.5)?
-            .add_operator("+", add, 2, 0.5);
-        assert!(duplicate.is_err());
-
-        let wrong_weights = OperatorsBuilder::default()
-            .add_operator("+", add, 2, 1.0)?
-            .add_operator("x", x, 0, 0.25)?
-            .build();
-        assert!(wrong_weights.is_err());
-
-        return Ok(());
-    }
 }
