@@ -1,4 +1,3 @@
-
 pub mod symbolic {
     use std::cmp::PartialOrd;
     use std::ops::{Add, Sub, Mul, Div};
@@ -73,23 +72,18 @@ pub mod symbolic {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::symbolic::*;
-    use crate::operators::set::{OperatorsBuilder, BuilderError};
+use crate::operators::set::{BuilderError, OperatorsBuilder, Operators};
+use symbolic::{add, sub, mul, div, sin, cos};
 
-    #[test]
-    fn test_x_works() -> Result<(), BuilderError>  {
-        let _ = OperatorsBuilder::default()
-            .add_operator("+", add, 2, 1.0 / 7.0)?
-            .add_operator("-", sub, 2, 1.0 / 7.0)?
-            .add_operator("*", mul, 2, 1.0 / 7.0)?
-            .add_operator("/", div, 2, 1.0 / 7.0)?
-            .add_operator("sin", sin, 1, 1.0 / 7.0)?
-            .add_operator("cos", sin, 1, 1.0 / 7.0)?
-            .add_operator("ln", sin, 1, 1.0 / 7.0)?
-            .build();
-        
-        return Ok(());
-    }
+pub fn koza() -> Result<Operators, BuilderError> {
+    let koza = OperatorsBuilder::default()
+        .add_operator("+", add, 2, 1.0 / 6.0)?
+        .add_operator("-", sub, 2, 1.0 / 6.0)?
+        .add_operator("*", mul, 2, 1.0 / 6.0)?
+        .add_operator("/", div, 2, 1.0 / 6.0)?
+        .add_operator("sin", sin, 1, 1.0 / 6.0)?
+        .add_operator("cos", cos, 1, 1.0 / 6.0)?
+        .build();
+
+    return koza;
 }
