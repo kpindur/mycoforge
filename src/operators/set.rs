@@ -23,6 +23,9 @@ impl Operators {
     pub fn operators(&self) -> &HashMap<String, Functor> { return &self.operators; }
     pub fn sampler(&self) -> &OperatorSampler { return &self.sampler; }
 
+    pub fn operators_mut(&mut self) -> &mut HashMap<String, Functor> { return &mut self.operators; }
+    pub fn sampler_mut(&mut self) -> &mut OperatorSampler { return &mut self.sampler; }
+
     pub fn create_map(&self) -> HashMap<String, (usize, VectorFunction)> {
         let mut map = HashMap::new();
         for (key, value) in &self.operators {
