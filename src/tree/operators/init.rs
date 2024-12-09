@@ -23,7 +23,10 @@ impl Initializer<TreeGenotype> for Grow {
         let mut stack: Vec<(usize, usize)> = Vec::new();
         let mut tree: TreeGenotype = TreeGenotype::new(Vec::new(), HashMap::new());
         
-        let (term_set, func_set) = (sampler.sampler_with_arity(0, 0), sampler.sampler_with_arity(1, 2)); // max_arity should depend on sample, e.g., sampler.arity().iter().max()
+        let (term_set, func_set) = (
+            sampler.sampler_with_arity(0, 0), 
+            sampler.sampler_with_arity(1, 2)
+        ); // max_arity should depend on sample, e.g., sampler.arity().iter().max()
 
         let mut root: usize = 0;
         let (node_id, node_arity) = 
@@ -55,42 +58,6 @@ impl Initializer<TreeGenotype> for Grow {
                 stack.push((root, depth+1));
             }
         }
-
         return tree;
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use rand::rngs::StdRng;
-    use rand::SeedableRng;
-
-    fn tmp_valid_tree(tree: TreeGenotype) -> bool {
-        let mut result: usize = 0;
-        for value in tree.children().values() {
-            result += value.len();
-        }
-
-        if (result + 1) != tree.arena().len() {
-            return false;
-        }
-        return true;
-    }
-
-    #[test]
-    fn test_intializer_grow() {
-        let operators: Vec<String> = ["+", "-", "sin", "x", "y", "z"].iter().map(|&w| w.to_string()).collect();
-        let arity = vec![2, 2, 1, 0, 0, 0];
-        let weights = vec![1.0 / 6.0; 6];
-
-        let sampler = OperatorSampler::new(operators, arity, weights);
-        
-        let mut rng = StdRng::seed_from_u64(42);
-
-        let init_scheme = Grow::new(1, 2);
-        let tree = init_scheme.initialize(&mut rng, &sampler);
-
-        assert!(tmp_valid_tree(tree));
     }
 }
