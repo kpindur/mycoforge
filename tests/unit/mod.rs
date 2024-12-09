@@ -2,6 +2,7 @@ mod tree_tests;
 mod individual_tests;
 
 mod functions_test;
+mod set_tests;
 mod sampler_tests;
 
 mod init_tests;
