@@ -1,4 +1,3 @@
-
 use crate::common::traits::{Genotype, Individual};
 
 pub struct TreeIndividual<G: Genotype> {
@@ -13,7 +12,6 @@ impl<G: Genotype> TreeIndividual<G> {
 }
 
 impl<G: Genotype> Individual<G> for TreeIndividual<G> {
-
     fn genotype(&self) -> &G { return &self.genotype; }
     fn phenotype(&self) -> f64 { return self.fitness; }
 
