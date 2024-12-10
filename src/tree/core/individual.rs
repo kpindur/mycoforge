@@ -1,5 +1,6 @@
 use crate::common::traits::{Genotype, Individual};
 
+#[derive(Clone)]
 pub struct TreeIndividual<G: Genotype> {
     genotype: G,
     fitness: f64

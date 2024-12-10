@@ -5,6 +5,7 @@ pub trait Sampler {
     fn sample<R: Rng>(&self, rng: &mut R) -> (String, usize);
 }
 
+#[derive(Clone)]
 pub struct OperatorSampler {
     operators: Vec<String>,
     arity:     Vec<usize>,
