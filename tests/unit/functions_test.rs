@@ -1,4 +1,3 @@
-
 use mycoforge::operators::functions::symbolic::*;
 use mycoforge::operators::set::{OperatorsBuilder, BuilderError};
 
