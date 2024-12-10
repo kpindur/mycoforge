@@ -3,24 +3,52 @@ pub mod symbolic {
     use std::ops::{Add, Sub, Mul, Div};
 
     pub trait Float: Copy + PartialOrd {
+        fn zero() -> Self;
+        fn one() -> Self;
+
+        fn min_value() -> Self;
+        fn max_value() -> Self;
+
         fn epsilon() -> Self;
+
         fn sin(self) -> Self;
         fn cos(self) -> Self;
         fn ln(self) -> Self;
+
+        fn is_finite(self) -> bool;
+        fn signum(self) -> Self;
     }
 
     impl Float for f32 {
+        fn zero() -> Self { return 0.0; }
+        fn one() -> Self { return 1.0; }
+
+        fn min_value() -> Self { return f32::MIN; }
+        fn max_value() -> Self { return 1e10; }
+
         fn epsilon() -> Self { return 1e-6; }
         fn sin(self) -> Self { return self.sin(); }
         fn cos(self) -> Self { return self.cos(); }
         fn ln(self) -> Self { return self.ln(); }
+
+        fn is_finite(self) -> bool { return self.is_finite(); }
+        fn signum(self) -> Self { return self.signum(); }
     }
 
     impl Float for f64 {
+        fn zero() -> Self { return 0.0; }
+        fn one() -> Self { return 1.0; }
+
+        fn min_value() -> Self { return f64::MIN; }
+        fn max_value() -> Self { return 1e10; }
+
         fn epsilon() -> Self { return 1e-6; }
         fn sin(self) -> Self { return self.sin(); }
         fn cos(self) -> Self { return self.cos(); }
         fn ln(self) -> Self { return self.ln(); }
+
+        fn is_finite(self) -> bool { return self.is_finite(); }
+        fn signum(self) -> Self { return self.signum(); }
     }
 
     type UnaryOp<T> = fn(T) -> T;
@@ -52,23 +80,26 @@ pub mod symbolic {
     }
 
     pub fn mul<T: Mul<Output = T> + Float>(args: &[&[T]]) -> Vec<T> {
-        return apply_binary(|a, b| a * b, args);
+        return apply_binary(|a, b| {
+            let result = a * b;
+            if result.is_finite() { result } else { result.signum() * T::max_value() }
+        }, args);
     }
 
     pub fn div<T: Div<Output = T> + Float>(args: &[&[T]]) -> Vec<T> {
-        return apply_binary(|a, b| if b < T::epsilon() { return a / a; } else { return a / b }, args);
+        return apply_binary(|a, b| if b < T::epsilon() { return T::one(); } else { return a / b }, args);
     }
 
     pub fn sin<T: Float>(args: &[&[T]]) -> Vec<T> {
-        return apply_unary(|a| a.sin(), args);
+        return apply_unary(|a| if a.is_finite() { a.sin() } else { T::zero() }, args);
     }
 
     pub fn cos<T: Float>(args: &[&[T]]) -> Vec<T> {
-        return apply_unary(|a| a.cos(), args);
+        return apply_unary(|a| if a.is_finite() { a.cos() } else { T::zero() }, args);
     }
 
     pub fn ln<T: Float>(args: &[&[T]]) -> Vec<T> {
-        return apply_unary(|a| a.ln(), args);
+        return apply_unary(|a| if a > T::epsilon() { a.ln() } else { T::min_value() }, args);
     }
 }
 
