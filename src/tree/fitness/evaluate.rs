@@ -22,7 +22,6 @@ impl Evaluator<TreeGenotype> for MeanSquared {
 
         for i in (0..tree.arena().len()).rev() {
             let node = &tree.arena()[i];
-            println!("Node {}: {}", i, node);
 
             if let Some((arity, op)) = map.get(node) {
                 match arity {
