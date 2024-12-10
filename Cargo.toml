@@ -17,6 +17,6 @@ rstest = "0.23.0"
 [lints.clippy]
 redundant_return = "allow"
 
-#[[bench]]
-#name = "symbolic_regression"
-#harness = false
+[[bench]]
+name = "symbolic_regression"
+harness = false
