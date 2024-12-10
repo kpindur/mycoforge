@@ -50,18 +50,37 @@ fn sample_dataset() -> Dataset {
     return data;
 }
 
+#[fixture]
+fn test_cases() -> Vec<(TreeGenotype, Dataset, f64)> {
+    return vec![
+        (sample_tree(), sample_dataset(), 0.0),
+
+        ({
+            let arena = ["*", "x", "x"].iter().map(|&s| s.to_string()).collect::<Vec<String>>();
+            let mut children: HashMap<usize, Vec<usize>> = HashMap::new();
+            children.insert(0, vec![1, 2]);
+
+            let tree = TreeGenotype::new(arena.clone(), children.clone());
+            tree
+        }, sample_dataset(), 3.85)
+    ];
+}
+
 fn x(args:&[&[f64]]) -> Vec<f64> {
     return args[0].to_vec();
 }
 
 #[rstest]
-fn test_mse(sample_function_set: Result<Operators, Box<dyn Error>>, sample_tree: TreeGenotype, sample_dataset: Dataset) {
-
+fn test_mse(sample_function_set: Result<Operators, Box<dyn Error>>, test_cases: Vec<(TreeGenotype, Dataset, f64)>) {
     let map: HashMap<String, (usize, fn(&[&[f64]])-> Vec<f64>)> = sample_function_set.expect("Failed building sample_function_set").create_map();
 
     let metric = MeanSquared::new();
+    let epsilon = 1e-5;
 
-    let result = metric.evaluate(&sample_tree, &sample_dataset, &map);
-
-    assert_eq!(0.0, result);
+    for (tree, dataset, expected) in test_cases {
+        let result = metric.evaluate(&tree, &dataset, &map);
+        assert!((expected - result).abs() < epsilon, 
+            "Result differs from expected value! {} != {}", expected, result
+        );
+    }
 }
