@@ -1,6 +1,8 @@
 .scratch.md
 target
 
+benches_results/*
+
 */*.png
 */*.pdf
 
