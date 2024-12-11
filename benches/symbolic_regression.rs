@@ -73,6 +73,28 @@ pub fn benchmark(c: &mut Criterion) {
             })
         );
     }
+    let feature_names = ["x"].iter().map(|&s| s.to_string()).collect::<Vec<String>>();
+    let no_dims = 2;
+    let xs: Vec<f64> = vec![0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+    let ys = xs.iter().map(|&x| x.powi(2) + x ).collect::<Vec<f64>>();
+    let test_data = vec![xs, ys];
+
+    let data = Dataset::new(feature_names, no_dims, test_data.clone(), test_data);
+    let map = operators.create_map();
+
+    for (min_depth, max_depth) in depths {
+        let init_scheme = Grow::new(min_depth, max_depth);
+        let trees = (0..pool_size).map(|_| init_scheme.initialize(&mut rng, sampler)).collect::<Vec<TreeGenotype>>();
+        let evaluator = MeanSquared::new();
+
+        group.bench_function(format!("evaluation/d{}_{}", min_depth, max_depth),
+            |b| b.iter(|| {
+                for tree in &trees {
+                    evaluator.evaluate(tree, &data, &map);
+                }
+            }) 
+        );
+    }
 
     group.bench_function("f1(x)=x^2+x", |b| {
         b.iter(|| {
