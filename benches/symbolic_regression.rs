@@ -5,6 +5,8 @@ use std::collections::HashMap;
 use std::path::Path;
 use rand::{rngs::StdRng, SeedableRng};
 
+use rayon::prelude::*;
+
 use mycoforge::dataset::dataset::Dataset;
 
 use mycoforge::{ea_components};
@@ -84,14 +86,32 @@ pub fn benchmark(c: &mut Criterion) {
 
     for (min_depth, max_depth) in depths {
         let init_scheme = Grow::new(min_depth, max_depth);
-        let trees = (0..pool_size).map(|_| init_scheme.initialize(&mut rng, sampler)).collect::<Vec<TreeGenotype>>();
         let evaluator = MeanSquared::new();
+
+        let trees = (0..pool_size/2).map(|_| init_scheme.initialize(&mut rng, sampler)).collect::<Vec<TreeGenotype>>();
+        let trees = trees.iter().cycle().take(pool_size).cloned().collect::<Vec<TreeGenotype>>();
 
         group.bench_function(format!("evaluation/d{}_{}", min_depth, max_depth),
             |b| b.iter(|| {
                 for tree in &trees {
                     evaluator.evaluate(tree, &data, &map);
                 }
+            }) 
+        );
+
+        group.bench_function(format!("evaluation_hashed/d{}_{}", min_depth, max_depth),
+            |b| b.iter(|| {
+                let mut cache: HashMap<TreeGenotype, f64> = HashMap::new();
+                for tree in &trees {
+                    if let Some(value) = cache.get(tree) { continue; }
+                    cache.insert(tree.clone(), evaluator.evaluate(tree, &data, &map));
+                }
+            })
+        );
+
+        group.bench_function(format!("evaluation_parallel/d{}_{}", min_depth, max_depth),
+            |b| b.iter(|| {
+                trees.par_iter().for_each(|tree| { evaluator.evaluate(tree, &data, &map); } );
             }) 
         );
     }
@@ -108,13 +128,7 @@ pub fn benchmark(c: &mut Criterion) {
                     evaluation: MeanSquared,
                     selection: TournamentSelection
                 },
-                operators: {
-                    "+" => (add, 2, 0.2),
-                    "-" => (sub, 2, 0.2),
-                    "*" => (mul, 2, 0.2),
-                    "/" => (div, 2, 0.2),
-                    "x" => (x, 0, 0.2)
-                },
+                operators: operators,
                 config: {
                     init: Grow::new(2, 4),
                     mutation: SubtreeMutation::new(0.1),
