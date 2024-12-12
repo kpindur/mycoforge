@@ -163,11 +163,7 @@ macro_rules! ea_components {
             evaluation: $eval_type:ty,
             selection: $sel_type:ty
         },
-        operators: {
-            $(
-                $op_name:literal => ($func:ident, $arity:literal, $weight:literal)
-            ),*$(,)?
-        },
+        operators: $operators:expr,
         config: {
             init: $init:expr,
             mutation: $mutation:expr,
@@ -187,16 +183,8 @@ macro_rules! ea_components {
                 type Sel = $sel_type;
             }
 
-            let operators: Vec<String> = vec![$($op_name.to_string()),*];
-            let functions: Vec<fn(&[&[f64]]) -> Vec<f64>> = vec![$($func),*];
-            let arity = vec![$($arity),*];
-            let weights = vec![$($weight), *];
-
-            let sampler = OperatorSampler::new(operators.clone(), arity.clone(), weights);
-
-            let map: HashMap<String, (usize, fn(&[&[f64]]) -> Vec<f64>)> = operators.into_iter()
-                .zip(arity.iter().zip(functions.iter()))
-                .map(|(op, (&ar, &func))| (op, (ar, func))).collect();
+            let sampler = $operators.sampler().clone();
+            let map = $operators.create_map();
 
             EABuilder::<Components, $genotype>::new()
                 .set_initializer($init)
