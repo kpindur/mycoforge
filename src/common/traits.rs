@@ -35,7 +35,7 @@ pub trait Evaluator<G: Genotype> {
     fn memoized_evaluate(&self, 
         tree: &G, data: &Self::D, 
         map: &HashMap<String, (usize, fn(&[&[f64]])-> Vec<f64>)>,
-        cache: &mut HashMap<TreeGenotype, f64>
+        cache: &HashMap<TreeGenotype, f64>
     ) -> f64;
 }
 
