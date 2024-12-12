@@ -1,3 +1,4 @@
+use std::hash::{Hash, Hasher};
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter, Result};
 
@@ -100,4 +101,23 @@ impl Display for TreeGenotype {
 
 impl Default for TreeGenotype {
     fn default() -> Self { return Self { arena: Vec::new(), children: HashMap::new() }; }
+}
+
+impl Hash for TreeGenotype {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let hashable = self.arena.iter().fold(
+            String::new(), |mut hashable, word| {
+                hashable.push_str(word);
+                hashable
+        });
+        hashable.hash(state);
+    }
+}
+
+impl Eq for TreeGenotype {}
+
+impl PartialEq for TreeGenotype {
+    fn eq(&self, other: &Self) -> bool {
+        return self.arena == other.arena;
+    }
 }
