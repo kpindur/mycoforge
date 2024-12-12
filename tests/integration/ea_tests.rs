@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use std::error::Error;
 
 use mycoforge::operators::sampler::OperatorSampler;
-use mycoforge::operators::set::OperatorsBuilder;
+use mycoforge::operators::set::{Operators, OperatorsBuilder};
 use mycoforge::common::traits::{Optimizer, Evaluator, Individual};
 
 use mycoforge::tree::{
@@ -16,7 +16,7 @@ use mycoforge::dataset::dataset::Dataset;
 use mycoforge::optimizers::ga::{EABuilder, EAComponents};
 use mycoforge::operators::functions::symbolic::*;
 
-use mycoforge::ea_components;
+use mycoforge::{ea_components, operators};
 
 fn is_valid_tree(tree: &TreeGenotype) -> bool {
     let num_edges = tree.arena().len() - 1;
@@ -27,9 +27,22 @@ fn is_valid_tree(tree: &TreeGenotype) -> bool {
 fn x(args:&[&[f64]]) -> Vec<f64> {
     return args[0].to_vec();
 }
-    
-#[test]
-fn test_builder_works() -> Result<(), Box<dyn Error>> {
+
+#[fixture]
+fn sample_operators() -> Operators {
+    let operators = OperatorsBuilder::default()
+        .add_operator("+", add, 2, 1.0 / 5.0).expect("Failed to add operator!")
+        .add_operator("-", sub, 2, 1.0 / 5.0).expect("Failed to add operator!")
+        .add_operator("*", mul, 2, 1.0 / 5.0).expect("Failed to add operator!")
+        .add_operator("/", div, 2, 1.0 / 5.0).expect("Failed to add operator!")
+        .add_operator("x", x, 0, 1.0 / 5.0).expect("Failed to add operator!")
+        .build().expect("Failed to build operators!");
+
+    return operators;
+}
+
+#[rstest]
+fn test_builder_works(sample_operators: Operators) -> Result<(), Box<dyn Error>> {
     struct Components;
     impl EAComponents<TreeGenotype> for Components {
         type I = TreeIndividual<TreeGenotype>;
@@ -40,15 +53,8 @@ fn test_builder_works() -> Result<(), Box<dyn Error>> {
         type Sel = TournamentSelection;
     }
 
-    let operators = OperatorsBuilder::default()
-        .add_operator("+", add, 2, 1.0 / 5.0)?
-        .add_operator("-", sub, 2, 1.0 / 5.0)?
-        .add_operator("*", mul, 2, 1.0 / 5.0)?
-        .add_operator("/", div, 2, 1.0 / 5.0)?
-        .add_operator("x", x, 0, 1.0 / 5.0)?
-        .build().expect("Failed to build operators!");
-    let sampler = operators.sampler().clone();
-    let map = operators.create_map();
+    let sampler = sample_operators.sampler().clone();
+    let map = sample_operators.create_map();
 
     let init_scheme = Grow::new(2, 4);
     let mutation_scheme = SubtreeMutation::new(1.0);
@@ -70,8 +76,8 @@ fn test_builder_works() -> Result<(), Box<dyn Error>> {
     return Ok(());
 }
 
-#[test]
-fn test_macro_works() {
+#[rstest]
+fn test_macro_works(sample_operators: Operators) {
     let _ = ea_components! {
         genotype: TreeGenotype,
         individual: TreeIndividual<TreeGenotype>,
@@ -82,13 +88,7 @@ fn test_macro_works() {
             evaluation: MeanSquared,
             selection: TournamentSelection
         },
-        operators: {
-            "+" => (add, 2, 0.2),
-            "-" => (sub, 2, 0.2),
-            "*" => (mul, 2, 0.2),
-            "sin" => (sin, 1, 0.2),
-            "x" => (x, 0, 0.2)
-        },
+        operators: sample_operators,
         config: {
             init: Grow::new(2, 4),
             mutation: SubtreeMutation::new(0.1),
@@ -115,7 +115,7 @@ fn sample_dataset() -> Dataset {
 }
 
 #[rstest]
-fn test_optimize_works(sample_dataset: Dataset) {
+fn test_optimize_works(sample_operators: Operators, sample_dataset: Dataset) {
     let ea = ea_components! {
         genotype: TreeGenotype,
         individual: TreeIndividual<TreeGenotype>,
@@ -126,13 +126,7 @@ fn test_optimize_works(sample_dataset: Dataset) {
             evaluation: MeanSquared,
             selection: TournamentSelection
         },
-        operators: {
-            "+" => (add, 2, 0.2),
-            "-" => (sub, 2, 0.2),
-            "*" => (mul, 2, 0.2),
-            "sin" => (sin, 1, 0.2),
-            "x" => (x, 0, 0.2)
-        },
+        operators: sample_operators,
         config: {
             init: Grow::new(2, 4),
             mutation: SubtreeMutation::new(0.1),
