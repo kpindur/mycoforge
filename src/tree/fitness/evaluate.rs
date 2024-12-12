@@ -50,4 +50,14 @@ impl Evaluator<TreeGenotype> for MeanSquared {
             .sum::<f64>();
         return result;
     }
+
+    fn memoized_evaluate(&self, 
+            tree: &TreeGenotype, data: &Self::D, 
+            map: &HashMap<String, (usize, fn(&[&[f64]])-> Vec<f64>)>,
+            cache: &mut HashMap<TreeGenotype, f64>
+        ) -> f64 {
+        if let Some(&value) = cache.get(tree) { return value; }
+
+        return self.evaluate(tree, data, map);
+    }
 }
