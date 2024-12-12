@@ -557,6 +557,7 @@ dependencies = [
  "log",
  "proptest",
  "rand",
+ "rayon",
  "rstest",
 ]
 
