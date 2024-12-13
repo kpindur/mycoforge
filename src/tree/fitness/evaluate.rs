@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::common::traits::Data;
 use crate::{common::traits::Evaluator, tree::core::tree::TreeGenotype};
-use crate::dataset::dataset::Dataset;
+use crate::dataset::core::Dataset;
 
 //Mean Squared Error (MSE) - most popular
 //Root Mean Squared Error (RMSE)
