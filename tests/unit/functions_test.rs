@@ -13,7 +13,7 @@ fn test_f32_functions() {
     assert!(1.0 - f32::one() < epsilon_f32,
         "f32::one(): expected {}, found {} ", 1.0, f32::one()
     );
-    assert!(0.0 - f32::one() < epsilon_f32,
+    assert!(0.0 - f32::zero() < epsilon_f32,
         "f32::zero(): expected {}, found {}", 0.0, f32::zero()
     );
     let relative_error = (f32::MIN - f32::min_value()) / f32::MIN;
@@ -53,7 +53,7 @@ fn test_f64_functions() {
     assert!(1.0 - f64::one() < epsilon_f64,
         "f64::one(): expected {}, found {} ", 1.0, f64::one()
     );
-    assert!(0.0 - f64::one() < epsilon_f64,
+    assert!(0.0 - f64::zero() < epsilon_f64,
         "f64::zero(): expected {}, found {}", 0.0, f64::zero()
     );
     let relative_error = (f64::MIN - f64::min_value()) / f64::MIN;
