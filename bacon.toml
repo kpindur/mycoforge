@@ -20,6 +20,7 @@ command = [
     "cargo", "clippy",
     "--all-targets",
     "--color", "always",
+    "--", "-A", "clippy::needless_return"
 ]
 need_stdout = false
 
