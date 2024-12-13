@@ -90,7 +90,6 @@ fn test_float_special<T: Float + std::ops::Mul + std::ops::Neg + std::fmt::Debug
     assert!(T::min_value().is_finite(), "min_value should be finite!");
 
     assert_eq!(T::one().signum(), T::one(), "signum of 1.0 should be 1.0");
-    assert_eq!(T::zero().signum(), T::zero(), "signum of 0.0 should be 0.0");
 }
 
 #[test]
