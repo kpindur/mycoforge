@@ -26,7 +26,7 @@ impl Selector<TreeGenotype> for TournamentSelection {
         return population.choose_multiple(rng, self.tournament_size)
             .min_by(|a, b| 
                 a.phenotype().partial_cmp(&b.phenotype()
-            ).expect(&format!("Fitness comparison failed: {} ? {}", a.phenotype(), b.phenotype())))
+            ).unwrap_or_else(|| panic!("Fitness comparison failed: {} ? {}", a.phenotype(), b.phenotype())))
             .expect("Tournament selection failed!")
             .genotype().clone();
      }
