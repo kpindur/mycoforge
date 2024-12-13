@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use rstest::{fixture, rstest};
 
+use mycoforge::common::types::VectorFunction;
 use mycoforge::common::traits::Evaluator;
 
 use mycoforge::tree::core::tree::TreeGenotype;
@@ -60,8 +61,7 @@ fn test_cases() -> Vec<(TreeGenotype, Dataset, f64)> {
             let mut children: HashMap<usize, Vec<usize>> = HashMap::new();
             children.insert(0, vec![1, 2]);
 
-            let tree = TreeGenotype::new(arena.clone(), children.clone());
-            tree
+            TreeGenotype::new(arena.clone(), children.clone())
         }, sample_dataset(), 3.85)
     ];
 }
@@ -72,7 +72,7 @@ fn x(args:&[&[f64]]) -> Vec<f64> {
 
 #[rstest]
 fn test_mse(sample_function_set: Result<Operators, Box<dyn Error>>, test_cases: Vec<(TreeGenotype, Dataset, f64)>) {
-    let map: HashMap<String, (usize, fn(&[&[f64]])-> Vec<f64>)> = sample_function_set.expect("Failed building sample_function_set").create_map();
+    let map: HashMap<String, (usize, VectorFunction)> = sample_function_set.expect("Failed building sample_function_set").create_map();
 
     let metric = MeanSquared::new();
     let epsilon = 1e-5;
