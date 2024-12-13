@@ -106,14 +106,16 @@ pub mod symbolic {
 use crate::operators::set::{BuilderError, OperatorsBuilder};
 use symbolic::{add, sub, mul, div, sin, cos};
 
-pub fn koza() -> Result<OperatorsBuilder, BuilderError> {
+pub fn koza(operators_size: usize) -> Result<OperatorsBuilder, BuilderError> {
+    assert!(operators_size > 6, "Operators size too small! Expected more than {}, found {}", 6, operators_size);
+    let operators_size = operators_size as f64;
     let koza = OperatorsBuilder::default()
-        .add_operator("+", add, 2, 1.0 / 6.0).expect("Failed to add an operator!")
-        .add_operator("-", sub, 2, 1.0 / 6.0).expect("Failed to add an operator!")
-        .add_operator("*", mul, 2, 1.0 / 6.0).expect("Failed to add an operator!")
-        .add_operator("/", div, 2, 1.0 / 6.0).expect("Failed to add an operator!")
-        .add_operator("sin", sin, 1, 1.0 / 6.0).expect("Failed to add an operator!")
-        .add_operator("cos", cos, 1, 1.0 / 6.0).expect("Failed to add an operator!");
+        .add_operator("+", add, 2, 1.0 / operators_size).expect("Failed to add an operator!")
+        .add_operator("-", sub, 2, 1.0 / operators_size).expect("Failed to add an operator!")
+        .add_operator("*", mul, 2, 1.0 / operators_size).expect("Failed to add an operator!")
+        .add_operator("/", div, 2, 1.0 / operators_size).expect("Failed to add an operator!")
+        .add_operator("sin", sin, 1, 1.0 / operators_size).expect("Failed to add an operator!")
+        .add_operator("cos", cos, 1, 1.0 / operators_size).expect("Failed to add an operator!");
 
     return Ok(koza);
 }
