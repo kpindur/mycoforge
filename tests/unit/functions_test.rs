@@ -82,6 +82,23 @@ fn test_f64_functions() {
     );
 }
 
+fn test_float_special<T: Float + std::ops::Mul + std::ops::Neg + std::fmt::Debug> () {
+    assert!(T::one().is_finite(), "1,0 should be finite!");
+    assert!(T::zero().is_finite(), "0.0 should be finite!");
+
+    assert!(T::max_value().is_finite(), "max_value should be finite!");
+    assert!(T::min_value().is_finite(), "min_value should be finite!");
+
+    assert_eq!(T::one().signum(), T::one(), "signum of 1.0 should be 1.0");
+    assert_eq!(T::zero().signum(), T::zero(), "signum of 0.0 should be 0.0");
+}
+
+#[test]
+fn test_special_values() {
+    test_float_special::<f32>();
+    test_float_special::<f64>();
+}
+
 fn x(vec: &[&[f64]]) -> Vec<f64> { return vec[0].to_vec(); }
 
 #[test]
