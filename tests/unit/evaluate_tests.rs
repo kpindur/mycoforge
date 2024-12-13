@@ -7,7 +7,7 @@ use mycoforge::common::traits::Evaluator;
 
 use mycoforge::tree::core::tree::TreeGenotype;
 
-use mycoforge::dataset::dataset::Dataset;
+use mycoforge::dataset::core::Dataset;
 use mycoforge::tree::fitness::evaluate::MeanSquared;
 
 use mycoforge::operators::set::{OperatorsBuilder, Operators};

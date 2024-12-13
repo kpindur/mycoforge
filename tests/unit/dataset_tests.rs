@@ -1,6 +1,6 @@
 use rand::{SeedableRng, rngs::StdRng};
 
-use mycoforge::dataset::dataset::Dataset;
+use mycoforge::dataset::core::Dataset;
 
 #[test]
 fn test_creation() {

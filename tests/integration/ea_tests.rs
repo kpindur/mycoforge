@@ -10,7 +10,7 @@ use mycoforge::tree::{
     fitness::evaluate::MeanSquared, 
     operators::{crossover::SubtreeCrossover, init::Grow, mutation::SubtreeMutation, select::TournamentSelection}
 };
-use mycoforge::dataset::dataset::Dataset;
+use mycoforge::dataset::core::Dataset;
 
 use mycoforge::optimizers::ga::{EABuilder, EAComponents};
 use mycoforge::operators::functions::symbolic::*;

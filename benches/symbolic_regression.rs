@@ -7,7 +7,7 @@ use rand::{rngs::StdRng, SeedableRng};
 
 use rayon::prelude::*;
 
-use mycoforge::dataset::dataset::Dataset;
+use mycoforge::dataset::core::Dataset;
 
 use mycoforge::ea_components;
 use mycoforge::optimizers::ga::{EABuilder, EAComponents};
