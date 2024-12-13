@@ -1,4 +1,5 @@
 pub mod error;
 pub mod loaders;
 
-pub mod dataset;
+pub mod core;
+pub mod logbook;
