@@ -2,6 +2,44 @@ use mycoforge::operators::functions::symbolic::*;
 use mycoforge::operators::set::{OperatorsBuilder, BuilderError};
 
 #[test]
+fn test_f32_functions() {
+    let epsilon_f32 = 1e-6f32;
+    let relative_error = (epsilon_f32 - f32::epsilon()) / epsilon_f32;
+    assert!(relative_error < 1e-10,
+        "f32::epsilon: expected {}, found {} with relative error {}",
+        epsilon_f32, f32::epsilon(), relative_error
+    );
+    assert!(1.0 - f32::one() < epsilon_f32,
+        "f32::one(): expected {}, found {} ", 1.0, f32::one()
+    );
+    assert!(0.0 - f32::one() < epsilon_f32,
+        "f32::zero(): expected {}, found {}", 0.0, f32::zero()
+    );
+    let relative_error = (f32::MIN - f32::min_value()) / f32::MIN;
+    assert!(relative_error < epsilon_f32,
+        "f32::min_value: expected {}, found {}, with relative error {}",
+        f32::MIN, f32::min_value(), relative_error
+    );
+    let max_val = 1e10;
+    let relative_error = (max_val - f32::max_value()) / f32::MAX;
+    assert!(relative_error < epsilon_f32,
+        "f32::max_value: expected {}, found {}, with relative error {}",
+        f32::MAX, f32::max_value(), relative_error
+    );
+    let test_value = 0.5f32;
+    assert!(test_value.sin() - Float::sin(0.5) < epsilon_f32,
+        "f32::sin: expected {}, found {}",
+        test_value.sin(), Float::sin(0.5)
+    );
+    assert!(test_value.cos() - Float::cos(0.5) < epsilon_f32,
+        "f32::cos: expected {}, found {}",
+        test_value.cos(), Float::cos(0.5)
+    );
+    assert!(test_value.ln() - Float::ln(0.5) < epsilon_f32,
+        "f32::ln: expected {}, found {}",
+        test_value.ln(), Float::ln(0.5)
+    );
+}
 fn test_empty_input() {
     let empty: Vec<f64> = Vec::new();
     let nonempty = [1.0f64];
