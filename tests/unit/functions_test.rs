@@ -81,6 +81,20 @@ fn test_f64_functions() {
     );
 }
 
+fn x(vec: &[&[f64]]) -> Vec<f64> { return vec[0].to_vec(); }
+
+#[test]
+fn test_koza_builder() {
+    let builder = koza(7).expect("Failed to construct builder for koza set!");
+    let operators = builder
+        .add_operator("x", x, 0, 1.0 / 7.0).expect("Failed to add an operator!")
+        .build().expect("Failed to build an operator set!");
+
+    assert_eq!(operators.operators().len(), 7,
+        "Wrong operators size! Expected {}, found {}", 7, operators.operators().len()
+    );
+}
+
 #[test]
 fn test_empty_input() {
     let empty: Vec<f64> = Vec::new();
