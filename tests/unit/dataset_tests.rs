@@ -1,6 +1,53 @@
-use rand::{SeedableRng, rngs::StdRng};
+use rand::{rngs::StdRng, thread_rng, SeedableRng};
 
 use mycoforge::dataset::core::Dataset;
+
+fn sample_data() -> (Vec<String>, Vec<Vec<f64>>) {
+    let headers = vec!["x".to_string(), "y".to_string()];
+    let data = vec![
+        vec![1.0, 2.0, 3.0, 4.0, 5.0],
+        vec![2.0, 4.0, 6.0, 8.0, 10.0], 
+    ];
+
+    return (headers, data);
+}
+
+fn sample_load_data(ratio: f64) -> Dataset {
+    return Dataset::from_csv(
+        &mut thread_rng(), "tests/fixtures/test_f1.csv",
+        ratio)
+        .expect("Failed to load data!");
+}
+
+#[test]
+fn test_manual_creation() {
+    let (headers, data) = sample_data();
+    let dataset = Dataset::new(headers.clone(), 1,
+        vec![vec![1.0], vec![2.0]],
+        data
+    );
+
+    assert_eq!(dataset.feature_names(), &headers);
+    assert_eq!(dataset.feature_names().len() - 1, 1);
+}
+
+#[test]
+fn test_separation() {
+    let ratios = [0.2, 0.3, 0.4, 0.5];
+    let whole_dataset = sample_load_data(0.0);
+    for ratio in ratios {
+        let dataset = sample_load_data(ratio);
+
+        assert_eq!(dataset.test_data().len(), dataset.train_data().len(),
+            "Number of columns does not match! Expected {}, found {}", dataset.test_data().len(), dataset.train_data().len()
+        );
+
+        let total = dataset.test_data()[0].len() + dataset.train_data()[0].len();
+        assert_eq!(total, whole_dataset.train_data()[0].len(),
+            "Total number of datapoints does not match! Expected {}, found {}", total, whole_dataset.train_data()[0].len()
+        );
+    }
+}
 
 #[test]
 fn test_creation() {
