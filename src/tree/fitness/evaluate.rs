@@ -11,7 +11,11 @@ use crate::dataset::core::Dataset;
 pub struct MeanSquared {}
 
 impl MeanSquared {
-    pub fn new() -> Self { return Self {} }
+    pub fn new() -> Self { return Self {}; }
+}
+
+impl Default for MeanSquared {
+    fn default() -> Self { return Self {}; }
 }
 
 impl Evaluator<TreeGenotype> for MeanSquared {
