@@ -59,7 +59,7 @@ fn test_subtree_mutation(sample_sampler: OperatorSampler) {
         let init_scheme = Grow::new(case.0, case.1);
         let tree = init_scheme.initialize(&mut rng, &sample_sampler);
         
-        let mutator = SubtreeMutation::new(1.0);
+        let mutator = SubtreeMutation::new(1.0, (1, 2)).expect("Failed to create mutation scheme!");
         let mutant = mutator.variate(&mut rng, &tree, &sample_sampler);
 
         assert_ne!(tree.arena(), mutant.arena());

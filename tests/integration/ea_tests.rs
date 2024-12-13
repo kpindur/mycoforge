@@ -56,14 +56,14 @@ fn test_builder_works(sample_operators: Operators) -> Result<(), Box<dyn Error>>
     let map = sample_operators.create_map();
 
     let init_scheme = Grow::new(2, 4);
-    let mutation_scheme = SubtreeMutation::new(1.0);
+    let mutation_scheme = SubtreeMutation::new(1.0, (1, 2));
     let crossover_scheme = SubtreeCrossover::new(1.0);
     let evaluation_scheme = MeanSquared::new();
     let selection_scheme = TournamentSelection::new(5);
 
     let _ = EABuilder::<Components, TreeGenotype>::new()
         .set_initializer(init_scheme)
-        .set_mutator(mutation_scheme)
+        .set_mutator(mutation_scheme?)
         .set_crossoverer(crossover_scheme)
         .set_evaluator(evaluation_scheme)
         .set_selector(selection_scheme)
@@ -90,7 +90,7 @@ fn test_macro_works(sample_operators: Operators) {
         operators: sample_operators,
         config: {
             init: Grow::new(2, 4),
-            mutation: SubtreeMutation::new(0.1),
+            mutation: SubtreeMutation::default(),
             crossover: SubtreeCrossover::new(0.9),
             evaluation: MeanSquared::new(),
             selection: TournamentSelection::new(5)
@@ -128,7 +128,7 @@ fn test_optimize_works(sample_operators: Operators, sample_dataset: Dataset) {
         operators: sample_operators,
         config: {
             init: Grow::new(2, 4),
-            mutation: SubtreeMutation::new(0.1),
+            mutation: SubtreeMutation::new(0.1, (1, 2)).expect("Failed to create mutation scheme!"),
             crossover: SubtreeCrossover::new(0.9),
             evaluation: MeanSquared::new(),
             selection: TournamentSelection::new(7)

@@ -11,16 +11,24 @@ use log::{info, error, debug};
 
 pub struct SubtreeMutation {
     probability: f64,
+    depth_limits: (usize, usize)
+}
+
+impl Default for SubtreeMutation {
+    fn default() -> Self {
+        debug!("Creating default SubtreeMutation with probability {} and depth limits ({}, {})", 0.1, 1, 2);
+        return Self::new(0.1, (1, 2)).expect("Failed to create default SubtreeMutation!");
+    }
 }
 
 impl SubtreeMutation {
-    pub fn new(probability: f64) -> Result<Self, MutationError> {
+    pub fn new(probability: f64, depth_limits: (usize, usize)) -> Result<Self, MutationError> {
         if !(0.0..=1.0).contains(&probability) {
             error!("Attempted to crate SubtreeMutation with invalid probability: {}", probability);
             return Err(MutationError::InvalidProbability(probability));
         }
         info!("Created SubtreeMutation operator with probability {}", probability);
-        return Ok(Self { probability });
+        return Ok(Self { probability, depth_limits });
     }
 
     fn substitute(individual: &TreeGenotype, subtree: &TreeGenotype, mutation_point: usize) 
@@ -44,7 +52,7 @@ impl Mutator<TreeGenotype> for SubtreeMutation {
         
         let mutation_point: usize = rng.gen_range(0..individual.arena().len());
         
-        let init_scheme = Grow::new(0, 2);
+        let init_scheme = Grow::new(self.depth_limits.0, self.depth_limits.1);
         let subtree: TreeGenotype = init_scheme.initialize(rng, sampler);
         debug!("Generated subtree of size {} at point {}", subtree.arena().len(), mutation_point);
         
