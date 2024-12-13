@@ -2,8 +2,7 @@ use rand::Rng;
 use std::collections::HashMap;
 
 use crate::operators::sampler::{OperatorSampler, Sampler};
-
-type VectorFunction = fn(&[&[f64]]) -> Vec<f64>;
+use crate::common::types::VectorFunction;
 
 pub trait OperatorSet {
     fn get_operator(&self, name: &str) -> Option<&Functor>;
