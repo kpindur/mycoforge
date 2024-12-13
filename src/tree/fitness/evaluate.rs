@@ -47,7 +47,7 @@ impl Evaluator<TreeGenotype> for MeanSquared {
             }
         }
         let (no_dims, operands) = data.data_train();
-        let truths = &operands[no_dims-1];
+        let truths = &operands[no_dims];
         let result = stack.pop().unwrap().iter()
             .zip(truths.iter())
             .map(|(t,y )| (t - y).powi(2))
