@@ -93,6 +93,14 @@ pub struct EABuilder<C: EAComponents<G>, G: Genotype> {
     map:            Option<HashMap<String, (usize, fn(&[&[f64]]) -> Vec<f64>)>>
 }
 
+ impl<C, G> Default for EABuilder<C, G>
+where
+    G: Genotype,
+    C: EAComponents<G>,
+ {
+    fn default() -> Self { return Self::new() }
+}
+
 impl<C, G> EABuilder<C, G> 
 where
     G: Genotype,
