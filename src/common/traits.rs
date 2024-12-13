@@ -4,6 +4,7 @@ use rand::Rng;
 use std::collections::HashMap;
 
 use crate::{operators::sampler::OperatorSampler, tree::core::tree::TreeGenotype};
+use crate::common::types::VectorFunction;
 
 pub trait Genotype: Clone + Display {}
 
@@ -29,12 +30,12 @@ pub trait Evaluator<G: Genotype> {
 
     fn evaluate(&self, 
         tree: &G, data: &Self::D, 
-        map: &HashMap<String, (usize, fn(&[&[f64]])-> Vec<f64>)>
+        map: &HashMap<String, (usize, VectorFunction)>
     ) -> f64;
 
     fn memoized_evaluate(&self, 
         tree: &G, data: &Self::D, 
-        map: &HashMap<String, (usize, fn(&[&[f64]])-> Vec<f64>)>,
+        map: &HashMap<String, (usize, VectorFunction)>,
         cache: &HashMap<TreeGenotype, f64>
     ) -> f64;
 }
