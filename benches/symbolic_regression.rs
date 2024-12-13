@@ -152,7 +152,7 @@ pub fn benchmark(c: &mut Criterion) {
             let mut fitnesses = initial_population.iter().map(|ind| ea.evaluator().evaluate(ind, &data, ea.map())).collect::<Vec<f64>>();
 
             let mut population = TreeIndividual::from_vecs(&initial_population, &fitnesses);
-            for i in 0..100 {
+            for _ in 0..100 {
                 let next_population = ea.optimize(&mut rng, &population);
                 fitnesses = next_population.iter().map(|ind| ea.evaluator().evaluate(ind, &data, ea.map())).collect::<Vec<f64>>();
                 population = TreeIndividual::from_vecs(&next_population, &fitnesses);
