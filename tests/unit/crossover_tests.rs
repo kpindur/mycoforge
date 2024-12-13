@@ -61,7 +61,7 @@ fn test_subtree_crossover(sample_sampler: OperatorSampler) {
         let parent1 = init_scheme.initialize(&mut rng, &sample_sampler);
         let parent2 = init_scheme.initialize(&mut rng, &sample_sampler);
  
-        for parent in vec![&parent1, &parent2] {
+        for parent in [&parent1, &parent2] {
             assert!(
                 valid_tree(parent),
                 "Found invalid tree! Found parent {:?} with children {:?}", parent.arena(), parent.children()
@@ -71,8 +71,8 @@ fn test_subtree_crossover(sample_sampler: OperatorSampler) {
         let crossover = SubtreeCrossover::new(1.0);
         let mut children = crossover.variate(&mut rng, &parent1, &parent2, &sample_sampler);
         
-        for i in 0..children.len() {
-            *children[i].children_mut() = children[i].construct_children(&sample_sampler);
+        for child in &mut children {
+            *child.children_mut() = child.construct_children(&sample_sampler);
         }
 
         for i in 0..children.len() {
