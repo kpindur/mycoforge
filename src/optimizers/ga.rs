@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use rand::Rng;
 
 use crate::common::traits::{Crossoverer, Evaluator, Genotype, Individual, Initializer, Mutator, Optimizer, Selector};
+use crate::common::types::VectorFunction;
 use crate::operators::sampler::OperatorSampler;
 
 pub trait EAComponents<G: Genotype> {
@@ -22,7 +23,7 @@ pub struct EA<C: EAComponents<G>, G: Genotype>
     evaluator:      C::Eval,
     selector:       C::Sel,
     sampler:        OperatorSampler,
-    map:            HashMap<String, (usize, fn(&[&[f64]]) -> Vec<f64>)>
+    map:            HashMap<String, (usize, VectorFunction)>
 }
 
 impl<C, G> EA<C, G> 
@@ -32,13 +33,13 @@ where
 {
     pub fn new(initializer: C::Init, 
         mutator: C::Mut, crossoverer: C::Cross, evaluator: C::Eval, selector: C::Sel, 
-        sampler: OperatorSampler, map: HashMap<String, (usize, fn(&[&[f64]]) -> Vec<f64>)>) -> Self 
+        sampler: OperatorSampler, map: HashMap<String, (usize, VectorFunction)>) -> Self 
     {
         return Self { initializer, mutator, crossoverer, evaluator, selector, sampler, map };
     }
 
     pub fn evaluator(&self) -> &C::Eval { return &self.evaluator; }
-    pub fn map(&self) -> &HashMap<String, (usize, fn(&[&[f64]]) -> Vec<f64>)> { return &self.map; }
+    pub fn map(&self) -> &HashMap<String, (usize, VectorFunction)> { return &self.map; }
 }
 
 impl<C, G> Optimizer<G> for EA<C, G> 
@@ -90,7 +91,7 @@ pub struct EABuilder<C: EAComponents<G>, G: Genotype> {
     evaluator:      Option<C::Eval>,
     selector:       Option<C::Sel>,
     sampler:        Option<OperatorSampler>,
-    map:            Option<HashMap<String, (usize, fn(&[&[f64]]) -> Vec<f64>)>>
+    map:            Option<HashMap<String, (usize, VectorFunction)>>
 }
 
  impl<C, G> Default for EABuilder<C, G>
@@ -152,7 +153,7 @@ where
        return self;
    }
 
-   pub fn set_map(mut self, map: HashMap<String, (usize, fn(&[&[f64]]) -> Vec<f64>)>) -> Self { 
+   pub fn set_map(mut self, map: HashMap<String, (usize, VectorFunction)>) -> Self { 
        self.map = Some(map);
        return self;
    }
