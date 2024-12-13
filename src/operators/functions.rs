@@ -103,18 +103,17 @@ pub mod symbolic {
     }
 }
 
-use crate::operators::set::{BuilderError, OperatorsBuilder, Operators};
+use crate::operators::set::{BuilderError, OperatorsBuilder};
 use symbolic::{add, sub, mul, div, sin, cos};
 
-pub fn koza() -> Result<Operators, BuilderError> {
+pub fn koza() -> Result<OperatorsBuilder, BuilderError> {
     let koza = OperatorsBuilder::default()
-        .add_operator("+", add, 2, 1.0 / 6.0)?
-        .add_operator("-", sub, 2, 1.0 / 6.0)?
-        .add_operator("*", mul, 2, 1.0 / 6.0)?
-        .add_operator("/", div, 2, 1.0 / 6.0)?
-        .add_operator("sin", sin, 1, 1.0 / 6.0)?
-        .add_operator("cos", cos, 1, 1.0 / 6.0)?
-        .build();
+        .add_operator("+", add, 2, 1.0 / 6.0).expect("Failed to add an operator!")
+        .add_operator("-", sub, 2, 1.0 / 6.0).expect("Failed to add an operator!")
+        .add_operator("*", mul, 2, 1.0 / 6.0).expect("Failed to add an operator!")
+        .add_operator("/", div, 2, 1.0 / 6.0).expect("Failed to add an operator!")
+        .add_operator("sin", sin, 1, 1.0 / 6.0).expect("Failed to add an operator!")
+        .add_operator("cos", cos, 1, 1.0 / 6.0).expect("Failed to add an operator!");
 
-    return koza;
+    return Ok(koza);
 }
