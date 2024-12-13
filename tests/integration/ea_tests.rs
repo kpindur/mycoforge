@@ -1,8 +1,7 @@
 use rand::{rngs::StdRng, SeedableRng};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::error::Error;
 
-use mycoforge::operators::sampler::OperatorSampler;
 use mycoforge::operators::set::{Operators, OperatorsBuilder};
 use mycoforge::common::traits::{Optimizer, Evaluator, Individual};
 
@@ -16,11 +15,11 @@ use mycoforge::dataset::dataset::Dataset;
 use mycoforge::optimizers::ga::{EABuilder, EAComponents};
 use mycoforge::operators::functions::symbolic::*;
 
-use mycoforge::{ea_components, operators};
+use mycoforge::ea_components;
 
 fn is_valid_tree(tree: &TreeGenotype) -> bool {
     let num_edges = tree.arena().len() - 1;
-    let test_num_edges: usize = tree.children().values().into_iter().map(|v| v.len()).sum();
+    let test_num_edges: usize = tree.children().values().map(|v| v.len()).sum();
     return num_edges == test_num_edges;
 }
 
@@ -162,7 +161,7 @@ fn test_optimize_works(sample_operators: Operators, sample_dataset: Dataset) {
         assert_eq!(next_population.len(), population_size,
             "Population_size has changed! Expected {} found {}", population_size, next_population.len()
         );
-        assert!(next_population.iter().all(|ind| is_valid_tree(ind)),
+        assert!(next_population.iter().all(is_valid_tree),
             "Next population contains invalid trees!"
         );
 
@@ -179,7 +178,7 @@ fn test_optimize_works(sample_operators: Operators, sample_dataset: Dataset) {
             .collect::<HashSet<_>>()
             .len();
 
-        current_population = next_population.clone();
+        current_population.clone_from(&next_population);
     }
     assert!(final_avg_fitness <= initial_avg_fitness,
         "Population severely degraded after {} generations: {} -> {}", max_generations, initial_avg_fitness, final_avg_fitness
