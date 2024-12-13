@@ -13,6 +13,8 @@ use mycoforge::tree::fitness::evaluate::MeanSquared;
 use mycoforge::operators::set::{OperatorsBuilder, Operators};
 use mycoforge::operators::functions::symbolic::{add, sub, mul, sin};
 
+fn x(args:&[&[f64]]) -> Vec<f64> { return args[0].to_vec(); }
+
 #[fixture]
 fn sample_function_set() -> Result<Operators, Box<dyn Error>> {
     let sample_operators = OperatorsBuilder::default()
@@ -40,13 +42,16 @@ fn sample_tree() -> TreeGenotype {
 
 #[fixture]
 fn sample_dataset() -> Dataset {
-    let feature_names = ["x"].iter().map(|&s| s.to_string()).collect::<Vec<String>>();
-    let no_dims = 2;
-    let xs: Vec<f64> = vec![0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
-    let ys = xs.iter().map(|&v| v.powi(2) + v ).collect::<Vec<f64>>();
-    let test_data = vec![xs, ys];
-    
-    let data = Dataset::new(feature_names, no_dims, test_data.clone(), test_data);
+    let data = Dataset::from_csv(&mut rand::thread_rng(), "tests/fixtures/test_f1.csv", 0.0)
+        .expect("Failed to load dataset");
+
+    assert_eq!(data.test_data().len(), data.train_data().len(),
+        "Test and train data should be of the same length! {} ? {}", 
+        data.test_data().len(), data.train_data().len()
+    );
+    assert_eq!(vec!["x".to_string(), "y".to_string()], *data.feature_names(),
+        "Feature names do not match! Expected {:?}, found {:?}", vec!["x", "y"], data.feature_names()
+    );
 
     return data;
 }
@@ -55,19 +60,14 @@ fn sample_dataset() -> Dataset {
 fn test_cases() -> Vec<(TreeGenotype, Dataset, f64)> {
     return vec![
         (sample_tree(), sample_dataset(), 0.0),
-
         ({
             let arena = ["*", "x", "x"].iter().map(|&s| s.to_string()).collect::<Vec<String>>();
             let mut children: HashMap<usize, Vec<usize>> = HashMap::new();
             children.insert(0, vec![1, 2]);
 
             TreeGenotype::new(arena.clone(), children.clone())
-        }, sample_dataset(), 3.85)
+        }, sample_dataset(), 850.1683501683499)
     ];
-}
-
-fn x(args:&[&[f64]]) -> Vec<f64> {
-    return args[0].to_vec();
 }
 
 #[rstest]
