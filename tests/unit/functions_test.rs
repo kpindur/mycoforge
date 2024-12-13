@@ -40,6 +40,48 @@ fn test_f32_functions() {
         test_value.ln(), Float::ln(0.5)
     );
 }
+
+#[test]
+fn test_f64_functions() {
+    let epsilon_f64 = 1e-6f64;
+    let relative_error = (epsilon_f64 - f64::epsilon()) / epsilon_f64;
+    assert!(relative_error < 1e-10,
+        "f64::epsilon: expected {}, found {} with relative error {}",
+        epsilon_f64, f64::epsilon(), relative_error
+    );
+    assert!(1.0 - f64::one() < epsilon_f64,
+        "f64::one(): expected {}, found {} ", 1.0, f64::one()
+    );
+    assert!(0.0 - f64::one() < epsilon_f64,
+        "f64::zero(): expected {}, found {}", 0.0, f64::zero()
+    );
+    let relative_error = (f64::MIN - f64::min_value()) / f64::MIN;
+    assert!(relative_error < epsilon_f64,
+        "f64::min_value: expected {}, found {}, with relative error {}",
+        f64::MIN, f64::min_value(), relative_error
+    );
+    let max_val = 1e10;
+    let relative_error = (max_val - f64::max_value()) / f64::MAX;
+    assert!(relative_error < epsilon_f64,
+        "f64::max_value: expected {}, found {}, with relative error {}",
+        f64::MAX, f64::max_value(), relative_error
+    );
+    let test_value = 0.5f64;
+    assert!(test_value.sin() - Float::sin(0.5) < epsilon_f64,
+        "f64::sin: expected {}, found {}",
+        test_value.sin(), Float::sin(0.5)
+    );
+    assert!(test_value.cos() - Float::cos(0.5) < epsilon_f64,
+        "f64::cos: expected {}, found {}",
+        test_value.cos(), Float::cos(0.5)
+    );
+    assert!(test_value.ln() - Float::ln(0.5) < epsilon_f64,
+        "f64::ln: expected {}, found {}",
+        test_value.ln(), Float::ln(0.5)
+    );
+}
+
+#[test]
 fn test_empty_input() {
     let empty: Vec<f64> = Vec::new();
     let nonempty = [1.0f64];
