@@ -10,7 +10,7 @@ use mycoforge::operators::sampler::OperatorSampler;
 use mycoforge::tree::core::tree::TreeGenotype;
 
 use mycoforge::tree::operators::init::Grow;
-use mycoforge::tree::operators::mutation::SubtreeMutation;
+use mycoforge::tree::operators::mutation::{SizeFairMutation, SubtreeMutation};
 
 fn valid_tree(tree: &TreeGenotype) -> bool {
     let mut result: usize = 0;
@@ -65,5 +65,47 @@ fn test_subtree_mutation(sample_sampler: OperatorSampler) {
         assert_ne!(tree.arena(), mutant.arena());
         assert!(!mutant.children().is_empty());
         assert!(valid_tree(&tree));
+    }
+}
+
+#[rstest]
+fn test_size_fair_mutation(sample_sampler: OperatorSampler) {
+    let mut rng = StdRng::seed_from_u64(42);
+    
+    let test_cases = vec![
+        (false, "static"),
+        (true, "dynamic")
+    ];
+
+    for (dynamic_limit, case_name) in test_cases {
+        let init_scheme = Grow::new(2, 3);
+        let tree = init_scheme.initialize(&mut rng, &sample_sampler);
+        let original_size = tree.arena().len();
+
+        let mutator = SizeFairMutation::new(1.0, dynamic_limit).expect("Failed to create mutation scheme!");
+        let mutant = mutator.variate(&mut rng, &tree, &sample_sampler);
+
+        assert_ne!(tree.arena(), mutant.arena(),
+            "{}: Tree enchanged", case_name
+        );
+        assert!(!mutant.children().is_empty(), 
+            "{}: Empty children", case_name
+        );
+        assert!(valid_tree(&mutant), 
+            "{}: Invalid mutant", case_name
+        );
+
+        let mutant_size = mutant.arena().len();
+        let min_size = (original_size as f64 / 2.0).floor() as usize;
+        let max_size = (original_size as f64 * 1.5).ceil() as usize;
+
+        assert!(mutant_size >= min_size,
+            "{}: Tree too small! Expected ({}..{}), found {}", 
+            case_name, min_size, max_size, mutant_size
+        );
+        assert!(mutant_size <= max_size,
+            "{}: Tree too large! Expected ({}..{}), found {}", 
+            case_name, min_size, max_size, mutant_size
+        );
     }
 }
