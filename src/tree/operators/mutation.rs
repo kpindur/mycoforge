@@ -119,6 +119,7 @@ impl Mutator<TreeGenotype> for SizeFairMutation {
         let mut tree = TreeGenotype::with_arena(arena);
         *tree.children_mut() = tree.construct_children(sampler);
 
+        debug!("Completed mutation: original size {} -> mutant size {}", individual.arena().len(), tree.arena().len());
         return tree.clone();
     }
 }
