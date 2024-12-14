@@ -285,9 +285,7 @@ impl Mutator<TreeGenotype> for ConstantMutation {
 
         let constant_positions = arena.iter().enumerate()
             .filter(|(_, node)| {
-                let is_terminal = sampler.sampler_with_arity(0, 0).operators().contains(node);
-                let is_constant = node.parse::<f64>().is_ok();
-                is_terminal && is_constant
+                node.parse::<f64>().is_ok()
             })
             .map(|(i, _)| i).collect::<Vec<usize>>();
 
