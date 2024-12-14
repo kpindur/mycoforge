@@ -135,3 +135,57 @@ fn test_point_mutation(sample_sampler: OperatorSampler) {
         );
     }
 }
+
+#[rstest]
+fn test_constant_mutation_basic(sample_sampler: OperatorSampler) {
+    let mut rng = StdRng::seed_from_u64(42);
+
+    let arena = vec!["0.5".to_string()];
+    let tree = TreeGenotype::with_arena(arena);
+
+    let mutator = ConstantMutation::new(1.0, 0.1, None)
+        .expect("Failed to create mutation scheme!");
+    let mutant = mutator.variate(&mut rng, &tree, &sample_sampler);
+
+    assert_ne!(mutant.arena()[0], tree.arena()[0],
+        "Value should have changed! Original {}, found {}", tree.arena()[0], mutant.arena()[0]
+    );
+    assert!(mutant.arena()[0].parse::<f64>().is_ok(),
+        "Invalid float was created! Original {}, found {}", tree.arena()[0], mutant.arena()[0]
+    );
+}
+
+#[rstest]
+fn test_constant_mutation_no_constants(sample_sampler: OperatorSampler) {
+    let mut rng = StdRng::seed_from_u64(42);
+
+    let arena = vec!["x".to_string()];
+    let tree = TreeGenotype::with_arena(arena);
+
+    let mutator = ConstantMutation::new(1.0, 0.1, None)
+        .expect("Failed to create mutation scheme!");
+    let mutant = mutator.variate(&mut rng, &tree, &sample_sampler);
+
+    assert_eq!(mutant.arena(), tree.arena(),
+        "Mutated should not have mutated! Original {:?}, found {:?}", tree.arena(), mutant.arena()
+    );
+}
+
+#[rstest]
+fn test_constant_mutation(sample_sampler: OperatorSampler) {
+    let mut rng = StdRng::seed_from_u64(42);
+
+    let arena = ["+", "1.0", "3.14"].iter().map(|s| s.to_string()).collect::<Vec<String>>();
+    let tree = TreeGenotype::with_arena(arena);
+
+    let mutator = ConstantMutation::new(1.0, 0.1, None)
+        .expect("Failed to create mutation scheme!");
+    let mutant = mutator.variate(&mut rng, &tree, &sample_sampler);
+
+    assert_ne!(mutant.arena(), tree.arena(),
+        "Mutated should have mutated! Original {:?}, found {:?}", tree.arena(), mutant.arena()
+    );
+    assert_eq!(1, mutant.arena().iter().zip(tree.arena().iter()).filter(|(a, b)| a != b).count(),
+        "Only one value should have mutated! Original {:?}, found {:?}", tree.arena(), mutant.arena()
+    );
+}
