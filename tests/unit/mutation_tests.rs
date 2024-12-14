@@ -64,7 +64,7 @@ fn test_subtree_mutation(sample_sampler: OperatorSampler) {
 
         assert_ne!(tree.arena(), mutant.arena());
         assert!(!mutant.children().is_empty());
-        assert!(valid_tree(&tree));
+        assert!(valid_tree(&mutant));
     }
 }
 
