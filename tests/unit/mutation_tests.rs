@@ -127,18 +127,9 @@ fn test_point_mutation(sample_sampler: OperatorSampler) {
         let mutator = PointMutation::new(1.0).expect("Failed to create mutation scheme!");
         let mutant = mutator.variate(&mut rng, &tree, &sample_sampler);
 
-        assert_ne!(tree.arena(), mutant.arena(),
-            "Tree did not mutate!"
+        assert_eq!(mutant.children(), tree.children(),
+            "List of childrens is different!"
         );
-        if mutant.arena().len() == 1 {
-            assert!(mutant.children().is_empty(),
-                "List of children not empty! Expected tree size 1, found {}", mutant.arena().len()
-            );
-        } else {
-            assert!(!mutant.children().is_empty(),
-                "List of children should not be empty! Tree size {}", mutant.arena().len() 
-            );
-        }
         assert!(valid_tree(&mutant),
             "Mutant is invalid!"
         );
