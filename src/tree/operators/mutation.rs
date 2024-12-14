@@ -170,3 +170,47 @@ impl Mutator<TreeGenotype> for SizeFairMutation {
         return tree.clone();
     }
 }
+
+pub struct PointMutation {
+    probability: f64
+}
+
+impl Default for PointMutation {
+    fn default() -> Self {
+        debug!("Creating default PointMutation with probability {}", 0.1);
+        return Self::new(0.1).expect("Failed to create default PointMutation!");
+    }
+}
+
+impl PointMutation {
+    pub fn new(probability: f64) -> Result<Self, MutationError> {
+        if !(0.0..=1.0).contains(&probability) {
+            error!("Attempted to create PointMutation with invalid probability: {}", probability);
+            return Err(MutationError::InvalidProbability(probability));
+        }
+        info!("Created PointMutation operator with probability {}", probability);
+        return Ok(Self { probability });
+    }
+}
+
+impl Mutator<TreeGenotype> for PointMutation {
+    fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
+        if rng.gen::<f64>() > self.probability { 
+            debug!("Skipping mutation..");
+            return individual.clone(); 
+        }
+        
+        let mutation_point: usize = rng.gen_range(0..individual.arena().len());
+        
+        let init_scheme = Grow::new(0, 0);
+        let subtree = init_scheme.initialize(rng, sampler);
+        debug!("Generated subtree of size {} at point {}", subtree.arena().len(), mutation_point);
+        
+        let arena = substitute(individual, &subtree, mutation_point);
+        let mut tree = TreeGenotype::with_arena(arena);
+        *tree.children_mut() = tree.construct_children(sampler);
+        
+        debug!("Completed mutation: original size {} -> mutant size {}", individual.arena().len(), tree.arena().len());
+        return tree.clone();
+    }
+}
