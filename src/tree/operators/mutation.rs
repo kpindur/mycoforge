@@ -236,3 +236,70 @@ impl Mutator<TreeGenotype> for PointMutation {
         return tree.clone();
     }
 }
+
+pub struct ConstantMutation {
+    probability: f64,
+    mutation_rate: f64,
+    range_limits: Option<(f64, f64)>
+}
+
+impl Default for ConstantMutation {
+    fn default() -> Self {
+        debug!("Creating default ConstantMutation with probability {}, mutation_rate {} and range_limits ({}, {})",
+            0.1, 0.1, -1.0, 1.0
+        );
+        return Self::new(0.1, 0.1, Some((-1.0, 1.0))).expect("Failed to create default ConstantMutation");
+    }
+}
+
+impl ConstantMutation {
+    pub fn new(probability: f64, mutation_rate: f64, range_limits: Option<(f64, f64)>) -> Result<Self, MutationError> {
+        if !(0.0..=1.0).contains(&probability) {
+            error!("Attempted to create ConstantMutation with invalid probability: {}", probability);
+            return Err(MutationError::InvalidProbability(probability));
+        }
+        if !(0.0..=1.0).contains(&mutation_rate) {
+            error!("Attempted to create ConstantMutation with invalid mutation_rate: {}", mutation_rate);
+            return Err(MutationError::InvalidMutationRate(mutation_rate));
+        }
+        if range_limits.is_none() {
+            info!("Created ConstantMutation operator with probability {} and mutation_rate {}", 
+                probability, mutation_rate
+            );
+            return Ok(Self { probability, mutation_rate, range_limits: None });
+        }
+        info!("Created ConstantMutation operator with probability {}, mutation_rate {} and range_limits ({}, {})", 
+            probability, mutation_rate, range_limits.expect("Failed to extract min range").0, range_limits.expect("Failed to extract max range").1
+        );
+        return Ok(Self { probability, mutation_rate, range_limits });
+    }
+}
+
+impl Mutator<TreeGenotype> for ConstantMutation {
+    fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
+        if rng.gen::<f64>() > self.probability {
+            debug!("Skipping mutation..");
+            return individual.clone();
+        }
+        let mut arena = individual.arena().clone();
+
+        for node in &mut arena {
+            let is_terminal = sampler.sampler_with_arity(0, 0)
+                .operators().contains(node);
+            let is_constant = node.parse::<f64>().is_ok();
+            if !is_terminal || !is_constant { continue; }
+            let current_value = node.parse::<f64>().unwrap_or_else(|_| panic!("Failed to parse constant node: {}", node));
+            let delta = (rng.gen::<f64>() * 2.0 - 1.0) * self.mutation_rate;
+            let mut new_value = current_value * ( 1.0 + delta);
+
+            if let Some((min, max)) = self.range_limits {
+                new_value = new_value.clamp(min, max);
+            }
+            *node = format!("{}", new_value);
+        }
+        let mut tree = TreeGenotype::with_arena(arena);
+        *tree.children_mut() = tree.construct_children(sampler);
+
+        return tree;
+    }
+}
