@@ -115,3 +115,32 @@ fn test_size_fair_mutation(sample_sampler: OperatorSampler) {
         );
     }
 }
+
+#[rstest]
+fn test_point_mutation(sample_sampler: OperatorSampler) {
+    let mut rng = StdRng::seed_from_u64(42);
+
+    for case in grow_test_cases() {
+        let init_scheme = Grow::new(case.0, case.1);
+        let tree = init_scheme.initialize(&mut rng, &sample_sampler);
+        
+        let mutator = PointMutation::new(1.0).expect("Failed to create mutation scheme!");
+        let mutant = mutator.variate(&mut rng, &tree, &sample_sampler);
+
+        assert_ne!(tree.arena(), mutant.arena(),
+            "Tree did not mutate!"
+        );
+        if mutant.arena().len() == 1 {
+            assert!(mutant.children().is_empty(),
+                "List of children not empty! Expected tree size 1, found {}", mutant.arena().len()
+            );
+        } else {
+            assert!(!mutant.children().is_empty(),
+                "List of children should not be empty! Tree size {}", mutant.arena().len() 
+            );
+        }
+        assert!(valid_tree(&mutant),
+            "Mutant is invalid!"
+        );
+    }
+}
