@@ -171,6 +171,18 @@ impl Mutator<TreeGenotype> for SizeFairMutation {
     }
 }
 
+/// Point mutation operator (aka node replacement mutation) that replaces a randomly selected node
+/// with another node of the same arity.
+///
+/// # Fields:
+/// * `probability: f64` - Mutation probability (0.0 to 1.0)
+///
+/// # Examples:
+/// ```
+/// use mycoforge::tree::operators::mutation::PointMutation;
+///
+/// let mutation = PointMutation::default();
+/// ```
 pub struct PointMutation {
     probability: f64
 }
@@ -194,6 +206,10 @@ impl PointMutation {
 }
 
 impl Mutator<TreeGenotype> for PointMutation {
+    /// Performs point mutation on the given individual.
+    ///
+    /// Returns the original individual unchanged if random number exceeds probability.
+    /// Otherwise returns mutated individual.
     fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
         if rng.gen::<f64>() > self.probability { 
             debug!("Skipping mutation..");
