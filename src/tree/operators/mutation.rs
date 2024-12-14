@@ -309,7 +309,8 @@ impl Mutator<TreeGenotype> for ConstantMutation {
 
         let mut tree = TreeGenotype::with_arena(arena);
         *tree.children_mut() = tree.construct_children(sampler);
-
+        
+        debug!("Completed mutation: constant {} -> {}", current_value, new_value);
         return tree;
     }
 }
