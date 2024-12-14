@@ -201,12 +201,18 @@ impl Mutator<TreeGenotype> for PointMutation {
         }
         
         let mutation_point: usize = rng.gen_range(0..individual.arena().len());
-        
-        let init_scheme = Grow::new(0, 0);
-        let subtree = init_scheme.initialize(rng, sampler);
-        debug!("Generated subtree of size {} at point {}", subtree.arena().len(), mutation_point);
-        
-        let arena = substitute(individual, &subtree, mutation_point);
+        let index = sampler.operators().iter()
+            .position(|s| *s == individual.arena()[mutation_point])
+            .expect("Failed to find operator in given sampler!");
+        let arity = sampler.arities()[index];
+        let limited_sampler = sampler.sampler_with_arity(arity, arity);
+        let new_node = limited_sampler.sample(rng);
+        assert_eq!(new_node.1, arity,
+            "Generated new node with different arity! Expected {}, found {}", arity, new_node.1
+        );
+        debug!("Generated new node {} with arity {}", new_node.0, new_node.1);
+        let mut arena = individual.arena().clone();
+        arena[mutation_point] = new_node.0;
         let mut tree = TreeGenotype::with_arena(arena);
         *tree.children_mut() = tree.construct_children(sampler);
         
