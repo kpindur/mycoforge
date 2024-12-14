@@ -1,3 +1,8 @@
+//! Tree mutation operators for Genetic Programming (GP)
+//!
+//! This module provides mutation operators for tree-based GP designed for manipulating
+//! `TreeGenotype` structure. Also serves as a template for custom mutation operators.
+
 use rand::Rng;
 
 use crate::common::traits::{Initializer, Mutator};
@@ -9,6 +14,7 @@ use super::init::Grow;
 use super::errors::MutationError;
 use log::{info, error, debug};
 
+/// Replaces a subtree at the specified mutation point in the individual with a new subtree
 fn substitute(individual: &TreeGenotype, subtree: &TreeGenotype, mutation_point: usize) 
     -> Vec<String> {
     let mutation_end: usize = individual.subtree(mutation_point);
@@ -20,6 +26,19 @@ fn substitute(individual: &TreeGenotype, subtree: &TreeGenotype, mutation_point:
     return new_arena;
 }
 
+/// Traditional subtree mutation operator that replaces a randomly selected subtree with a new one
+/// generated using the Grow initialization method.
+///
+/// # Fields:
+/// * `probability: f64` - Mutation probabilkity (0.0 to 1.0)
+/// * `depth_limits: (usize, usize)` - Min and max depth for new subtrees (inclusive) 
+///
+/// # Examples
+/// ```
+/// use mycoforge::tree::operators::mutation::SubtreeMutation;
+///
+/// let mutation = SubtreeMutation::default();
+/// ```
 pub struct SubtreeMutation {
     probability: f64,
     depth_limits: (usize, usize)
@@ -44,6 +63,10 @@ impl SubtreeMutation {
 }
 
 impl Mutator<TreeGenotype> for SubtreeMutation {
+    /// Performs subtree mutation on the given individual.
+    ///
+    /// Return the original individual unchanged if random number exceeds probability.
+    /// Otherwise return mutated individual.
     fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
         if rng.gen::<f64>() > self.probability { 
             debug!("Skipping mutation..");
@@ -64,7 +87,23 @@ impl Mutator<TreeGenotype> for SubtreeMutation {
         return tree.clone();
     }
 }
-
+/// Advanced mutation operator that generates replacement subtree with sizes proportional to the
+/// original tree or subtree size.
+///
+/// # Fields:
+/// * `probability: f64` - Mutation probability (0.0 to 1.0)
+/// * `dynamic_limit: bool` - when true, uses subtree size instead of full tree size for depth
+///                         calculations
+/// # Size Calculation:
+/// * Minimum depth = log2(tree_size / 2)
+/// * Maximum depth = log2(tree_size * 1.5)
+///
+/// # Examples
+/// ```
+/// use mycoforge::tree::operators::mutation::SizeFairMutation;
+///
+/// let mutation = SizeFairMutation::default();
+/// ```
 pub struct SizeFairMutation {
     probability: f64,
     dynamic_limit: bool
@@ -86,7 +125,10 @@ impl SizeFairMutation {
         info!("Created SizeFairMutation operator with probability {} and dynamic limit {}", probability, dynamic_limit);
         return Ok(Self { probability, dynamic_limit });
     }
-
+    /// Calculates minimum and maximum depths based on tree size.
+    ///
+    /// When `dynamic_limit` is true, uses the size of the subtree at `mutation_point`.
+    /// Otherwise, uses the size of the entire tree.
     fn calculate_depths(&self, tree: &TreeGenotype, mutation_point: usize) -> (usize, usize) {
         let tree_size = if self.dynamic_limit {
             let subtree_end = tree.subtree(mutation_point);
@@ -103,6 +145,10 @@ impl SizeFairMutation {
 }
 
 impl Mutator<TreeGenotype> for SizeFairMutation {
+    /// Performs size-fair mutation on the given individual.
+    ///
+    /// Returns the original individual unchanged if random number exceeds probability.
+    /// Otherwise returns mutated individual.
     fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
         if rng.gen::<f64>() > self.probability {
             debug!("Skipping mutation");
