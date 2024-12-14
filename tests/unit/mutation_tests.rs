@@ -62,9 +62,15 @@ fn test_subtree_mutation(sample_sampler: OperatorSampler) {
         let mutator = SubtreeMutation::new(1.0, (1, 2)).expect("Failed to create mutation scheme!");
         let mutant = mutator.variate(&mut rng, &tree, &sample_sampler);
 
-        assert_ne!(tree.arena(), mutant.arena());
-        assert!(!mutant.children().is_empty());
-        assert!(valid_tree(&mutant));
+        assert_ne!(tree.arena(), mutant.arena(),
+            "Tree unchanged"
+        );
+        assert!(!mutant.children().is_empty(),
+            "Empty children"
+        );
+        assert!(valid_tree(&mutant),
+            "Invalid mutant"
+        );
     }
 }
 
@@ -86,7 +92,7 @@ fn test_size_fair_mutation(sample_sampler: OperatorSampler) {
         let mutant = mutator.variate(&mut rng, &tree, &sample_sampler);
 
         assert_ne!(tree.arena(), mutant.arena(),
-            "{}: Tree enchanged", case_name
+            "{}: Tree unchanged", case_name
         );
         assert!(!mutant.children().is_empty(), 
             "{}: Empty children", case_name
