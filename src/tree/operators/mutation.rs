@@ -283,20 +283,30 @@ impl Mutator<TreeGenotype> for ConstantMutation {
         }
         let mut arena = individual.arena().clone();
 
-        for node in &mut arena {
-            let is_terminal = sampler.sampler_with_arity(0, 0)
-                .operators().contains(node);
-            let is_constant = node.parse::<f64>().is_ok();
-            if !is_terminal || !is_constant { continue; }
-            let current_value = node.parse::<f64>().unwrap_or_else(|_| panic!("Failed to parse constant node: {}", node));
-            let delta = (rng.gen::<f64>() * 2.0 - 1.0) * self.mutation_rate;
-            let mut new_value = current_value * ( 1.0 + delta);
+        let constant_positions = arena.iter().enumerate()
+            .filter(|(_, node)| {
+                let is_terminal = sampler.sampler_with_arity(0, 0).operators().contains(node);
+                let is_constant = node.parse::<f64>().is_ok();
+                is_terminal && is_constant
+            })
+            .map(|(i, _)| i).collect::<Vec<usize>>();
 
-            if let Some((min, max)) = self.range_limits {
-                new_value = new_value.clamp(min, max);
-            }
-            *node = format!("{}", new_value);
+        if constant_positions.is_empty() {
+            debug!("No constants to mutate! Skipping mutation..");
+            return individual.clone();
         }
+
+        let mutation_point = constant_positions[rng.gen_range(0..constant_positions.len())];
+
+        let current_value = arena[mutation_point].parse::<f64>()
+            .unwrap_or_else(|_| panic!("Failed to parse constant node: {}", arena[mutation_point]));
+        let delta = 1.0 + (rng.gen::<f64>() * 2.0 - 1.0) * self.mutation_rate;
+        let new_value = if let Some((min, max)) = self.range_limits {
+            (current_value * delta).clamp(min, max)
+        } else { current_value * delta };
+
+        arena[mutation_point] = format!("{}", new_value);
+
         let mut tree = TreeGenotype::with_arena(arena);
         *tree.children_mut() = tree.construct_children(sampler);
 
