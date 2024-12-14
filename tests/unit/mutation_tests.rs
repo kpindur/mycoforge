@@ -10,7 +10,7 @@ use mycoforge::operators::sampler::OperatorSampler;
 use mycoforge::tree::core::tree::TreeGenotype;
 
 use mycoforge::tree::operators::init::Grow;
-use mycoforge::tree::operators::mutation::{SizeFairMutation, SubtreeMutation};
+use mycoforge::tree::operators::mutation::{PointMutation, SizeFairMutation, SubtreeMutation};
 
 fn valid_tree(tree: &TreeGenotype) -> bool {
     let mut result: usize = 0;
