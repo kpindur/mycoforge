@@ -87,6 +87,7 @@ impl Mutator<TreeGenotype> for SubtreeMutation {
         return tree.clone();
     }
 }
+
 /// Advanced mutation operator that generates replacement subtree with sizes proportional to the
 /// original tree or subtree size.
 ///
