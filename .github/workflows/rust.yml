@@ -7,6 +7,9 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_USER: postgres
+  POSTGRES_DB: test_db
 
 jobs:
   build:
@@ -16,7 +19,7 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_PASSWD: postgres
+          POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
           POSTGRES_DB: test_db
         ports:
