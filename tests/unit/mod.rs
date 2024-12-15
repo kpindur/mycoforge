@@ -13,3 +13,4 @@ mod evaluate_tests;
 mod select_tests;
 
 mod dataset_tests;
+mod logger_tests;

@@ -44,11 +44,12 @@ impl Log for SimpleLogger {
 
 use std::error::Error;
 use std::env;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tokio_postgres::{Client, NoTls};
 
+#[derive(Clone)]
 pub struct PostgresLogger {
-    db_client: Mutex<Client>,
+    db_client: Arc<Mutex<Client>>,
     console_level: LevelFilter,
 }
 
@@ -80,10 +81,12 @@ impl PostgresLogger {
             ").await
         })?;
 
-        let db_client = Mutex::new(db_client);
+        let db_client = Arc::new(Mutex::new(db_client));
 
         return Ok(Self { db_client, console_level });
     }
+
+    pub fn db_client(&self) -> &Mutex<Client> { return &self.db_client; }
 
     fn construct_db_url() -> Result<String, env::VarError> {
         let user = env::var("POSTGRES_USER")?;
