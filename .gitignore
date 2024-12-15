@@ -1,4 +1,5 @@
 .scratch.md
+.envrc
 target
 
 benches_results/*

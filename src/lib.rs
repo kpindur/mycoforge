@@ -7,13 +7,9 @@ pub mod operators;
 pub mod dataset;
 
 #[cfg(not(feature = "postgres"))]
-mod logger {
-    pub use crate::dataset::logger::SimpleLogger as Logger;
-}
+pub use crate::dataset::logger::SimpleLogger as Logger;
 #[cfg(feature = "postgres")]
-mod logger {
-    pub use crate::dataset::logger::PostgresLogger as Logger;
-}
+pub use crate::dataset::logger::PostgresLogger as Logger;
 
 //pub mod linear;
 
