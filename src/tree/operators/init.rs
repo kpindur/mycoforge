@@ -6,9 +6,7 @@
 //! Serves as a template for creating custom initialization methods.
 
 use std::collections::HashMap;
-
-use rand::Rng;
-use rand::seq::SliceRandom;
+use rand::{Rng, seq::SliceRandom};
 
 use crate::common::traits::Initializer;
 use crate::tree::core::tree::TreeGenotype;
@@ -90,7 +88,7 @@ impl Initializer<TreeGenotype> for Grow {
 /// Implemented as a special case of Grow with min_depth = max_depth.
 ///
 /// # Fields:
-/// `depth: usize` - depth of the tree
+/// * `depth: usize` - depth of the tree
 ///
 /// # Examples
 /// ```
