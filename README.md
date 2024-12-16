@@ -55,10 +55,129 @@ NON EXISTENT
     - [ ] Add outline
     - [ ] Add content
 - [ ] Documentation
-- [ ] Initialization
-- [ ] Optimizers
-    - [ ] GA
-        - [ ] Evolutionary Operators
-    - [ ] EDA
-        - [ ] Learning/Updating algorithms
-- [ ] Schemata (?)
+- [ ] Implementation
+    - [ ] Primitive Set Management
+        - [ ] protected mathematical operation (add, subtract, multiply, divide)
+        - [ ] support for other mathematical functions (sin, cos, exp, log)
+        - [ ] variable management for input Features
+        - [ ] constant generation and management
+        - [ ] function to validate primitive compatibility
+    - [ ] TreeGenotype
+        - [ ] simple tree structure
+        - [ ] depth and size constraints?
+        - [ ] methods for tree traversal
+        - [ ] expression simplification?
+        - [ ] tree validation
+        - [ ] hard type trees?
+    - [ ] Population Handling?
+        - [ ] population initialization
+            - [ ] Grow
+            - [ ] Full
+            - [ ] Ramped Half and Half
+        - [ ] population size management
+        - [ ] diversity maintenance mechanism?
+        - [ ] population validation?
+        - [ ] constraint checking?
+        - [ ] cached evaluation
+    - [ ] Genetic Operators
+        - [ ] subtree crossover
+        - [ ] mutations
+            - [ ] point mutation
+            - [ ] subtree mutation
+            - [ ] constant mutation
+            - [ ] ...?
+        - [ ] operator probability management?
+        - [ ] type safe genetic operations
+        - [ ] operator result validation (or function correctness?)
+    - [ ] Selection mechanism
+        - [ ] tournament selection
+        - [ ] fitness proportionate selection
+        - [ ] age-based selection
+        - [ ] multi-objective?
+        - [ ] selection pressure adjustment
+    - [ ] Fitness evaluation
+        - [ ] mse
+        - [ ] rmse
+        - [ ] r-squared
+        - [ ] multi-objective fitness options?
+        - [ ] parallel fitness evaluation
+        - [ ] fitness normalization
+    - [ ] Optimizers
+        - [ ] Evolutionary algorithms
+            - [ ] generation control
+            - [ ] termination criteria management
+            - [ ] convergence detection
+            - [ ] resource usage monitoring?
+            - [ ] checkpointing?
+        - [ ] EDA
+            - [ ] linkage learning
+            - [ ] distance metrics
+            - [ ] distribution learning
+        - [ ] Hyperparameter Management
+            - [ ] population size
+            - [ ] operator probability
+            - [ ] selection pressure
+            - [ ] tree size/depth constraints
+            - [ ] runtime limits?
+    - [ ] Analysis and visualization
+        - [ ] Statistics tracking
+            - [ ] best fitness
+            - [ ] population diversity metrics
+            - [ ] complexity measures
+            - [ ] convergence metrics
+            - [ ] resource usage (benchmarks and bottlenecks)?
+        - [ ] Visualization tools
+            - [ ] tree structure
+            - [ ] fitness evolution
+            - [ ] prediction vs actual plots
+            - [ ] complexity evolution graphs
+            - [ ] interactive visualizations?
+    - [ ] Performance Features
+        - [ ] Optimization
+            - [ ] expression related?
+            - [ ] parallel evaluation
+            - [ ] memory management
+            - [ ] caching system (possibly permanently stored store kind of thing?)
+            - [ ] batch processing?
+        - [ ] Scalability
+            - [ ] distributed computing?
+            - [ ] large dataset handling
+            - [ ] memory efficiency?
+            - [ ] progress monitoring
+            - [ ] resource allocation and monitoring
+    - [ ] User Interface
+        - [ ] Configuration system
+            - [ ] parameter validation (builder pattern?)
+            - [ ] configuration file support?
+            - [ ] command line interface?
+            - [ ] runtime parameter adjustments?
+            - [ ] default configuration (via default?)
+            - [ ] logging system
+        - [ ] Result Management
+            - [ ] model serialization
+            - [ ] result logging (logbook?)
+            - [ ] export capabilities
+            - [ ] version control
+            - [ ] experiment tracking
+    - [ ] Documentation
+        - [ ] Code Documentation
+            - [ ] function Documentation
+            - [ ] struct Documentation
+            - [ ] usage examples
+            - [ ] performance tips
+            - [ ] API refs?
+        - [ ] User Guide
+            - [ ] installation instructions
+            - [ ] quick start guide
+            - [ ] advanced usage scenario
+            - [ ] best practices?
+            - [ ] troubleshooting guide
+    - [ ] Testing
+        - [ ] Test suite
+            - [ ] unit tests
+            - [ ] integration tests
+            - [ ] performance benchmarks
+            - [ ] edge case handling
+            - [ ] regression tests
+            - [ ] comparison with other frameworks
+
