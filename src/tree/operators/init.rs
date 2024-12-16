@@ -25,8 +25,8 @@ impl Initializer<TreeGenotype> for Grow {
         
         let (term_set, func_set) = (
             sampler.sampler_with_arity(0, 0), 
-            sampler.sampler_with_arity(1, 2)
-        ); // max_arity should depend on sample, e.g., sampler.arity().iter().max()
+            sampler.sampler_with_arity(1, *sampler.arities().iter().max().expect("Failed to get highest arity!"))
+        );
 
         let mut root: usize = 0;
         let (node_id, node_arity) = 
