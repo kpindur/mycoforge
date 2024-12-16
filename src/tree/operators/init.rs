@@ -61,3 +61,18 @@ impl Initializer<TreeGenotype> for Grow {
         return tree;
     }
 }
+
+pub struct Full {
+    depth: usize
+}
+
+impl Full {
+    pub fn new(depth: usize) -> Self { return Self { depth }; }
+}
+
+impl Initializer<TreeGenotype> for Full {
+    fn initialize<R: Rng>(&self, rng: &mut R, sampler: &OperatorSampler) -> TreeGenotype {
+        let scheme = Grow::new(self.depth, self.depth);
+        return scheme.initialize(rng, sampler);
+    }
+}
