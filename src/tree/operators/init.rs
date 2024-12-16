@@ -1,3 +1,10 @@
+//! Tree initialization methods for Genetic Programming.
+//!
+//! Provides standard implementations: Grow and Full methods.
+//! Designed to return `TreeGenotype` structure. Does not include `Ramped Half and Half` method,
+//! because it's more of method of constructing population, not a single individual.
+//! Serves as a template for creating custom initialization methods.
+
 use std::collections::HashMap;
 
 use rand::Rng;
@@ -7,6 +14,21 @@ use crate::common::traits::Initializer;
 use crate::tree::core::tree::TreeGenotype;
 use crate::operators::sampler::{OperatorSampler, Sampler};
 
+/// Grow initialization method
+///
+/// Generates trees with depths between minimum and maximum bounds.
+/// Forces function nodes until min_depth, then randomly selects between terminals/functions.
+///
+/// # Fields:
+/// * `min_depth: usize` - minimum depth of a tree
+/// * `max_depth: usize` - maximum depth of a tree
+///
+/// # Examples
+/// ```
+/// use mycoforge::tree::operators::init::Grow;
+/// 
+/// let initializer = Grow::new(1, 2); // min_depth=1, max_depth=2
+/// ```
 pub struct Grow {
     min_depth: usize,
     max_depth: usize
@@ -62,6 +84,20 @@ impl Initializer<TreeGenotype> for Grow {
     }
 }
 
+/// Full initialization method.
+///
+/// Generates complete trees where all branches reach specified depth.
+/// Implemented as a special case of Grow with min_depth = max_depth.
+///
+/// # Fields:
+/// `depth: usize` - depth of the tree
+///
+/// # Examples
+/// ```
+/// use mycoforge::tree::operators::init::Full;
+///
+/// let init = Full::new(2); // depth=2
+/// ```
 pub struct Full {
     depth: usize
 }
