@@ -286,7 +286,7 @@ impl Default for ConstantMutation {
         debug!("Creating default ConstantMutation with probability {}, mutation_rate {} and range_limits ({}, {})",
             0.1, 0.1, -1.0, 1.0
         );
-        return Self::new(0.1, 0.1, Some((-1.0, 1.0))).expect("Failed to create default ConstantMutation");
+        return Self::new(0.1, 0.1, None).expect("Failed to create default ConstantMutation");
     }
 }
 
