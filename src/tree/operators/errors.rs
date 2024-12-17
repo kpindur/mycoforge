@@ -19,3 +19,19 @@ impl fmt::Display for MutationError {
         }
     }
 }
+
+#[derive(Debug)]
+pub enum CrossoverError {
+    InvalidProbability(f64)
+}
+
+impl Error for CrossoverError {}
+
+impl fmt::Display for CrossoverError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            CrossoverError::InvalidProbability(probability)
+                => write!(f, "Invalid crossover probability: {}", probability),
+        }
+    }
+}
