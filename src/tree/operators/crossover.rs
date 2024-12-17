@@ -24,6 +24,7 @@ use log::{error, debug, info};
 ///
 /// let crossover = SubtreeCrossover::new(0.9);
 /// ```
+#[derive(Debug)]
 pub struct SubtreeCrossover {
     probability: f64,
 }
