@@ -1,9 +1,30 @@
+//! Tree crossover operators for Genetic Programming
+//!
+//! This module provides crossover operators for tree-based GP designed for manipulating
+//! [`TreeGenotype`][`crate::tree::core::tree::TreeGenotype`] structure. 
+//! Also serves as a template for custom crossover operators.
+
+use std::error::Error;
 use rand::Rng;
 
 use crate::common::traits::Crossoverer;
 use crate::tree::core::tree::TreeGenotype;
 use crate::operators::sampler::OperatorSampler;
+use crate::tree::operators::errors::CrossoverError;
 
+use log::{error, debug, info};
+
+/// Traditional subtree crossover operator that swaps randomly selected subtrees between parents.
+///
+/// # Fields
+/// * `probability: f64` - Crossover probability (0.0 to 1.0)
+///
+/// # Examples
+/// ```
+/// use mycoforge::tree::operators::crossover::SubtreeCrossover;
+///
+/// let crossover = SubtreeCrossover::new(0.9);
+/// ```
 pub struct SubtreeCrossover {
     probability: f64,
 }
@@ -15,6 +36,11 @@ impl Default for SubtreeCrossover {
     }
 }
 
+impl SubtreeCrossover {
+    /// Creates new SubtreeCrossover operator.
+    ///
+    /// # Arguments
+    /// * `probability: f64` - crossover probability (0.0 to 1.0)
     pub fn new(probability: f64) -> Result<Self, CrossoverError> {
         if !(0.0..=1.0).contains(&probability) { 
             error!("Attempted to crate SubtreeCrossover with invalid probability: {}", probability);
@@ -22,6 +48,15 @@ impl Default for SubtreeCrossover {
         }
         return Ok(Self { probability });
     }
+    
+    /// Swaps subtrees between parents at specified crossover points.
+    ///
+    /// # Arguments
+    /// * `parents: (&TreeGenotype, &TreeGenotype)` - parent trees for crossover
+    /// * `crossover_points: (usize, usize)` - indices where subtree swap occurs
+    ///
+    /// # Returns
+    /// * `Vec<Vec<String>>` - arenas of two offspring after subtree swap
     fn swap(parents: (&TreeGenotype, &TreeGenotype), crossover_points: (usize, usize)) 
         -> Vec<Vec<String>> {
         let (parent1, parent2) = parents;
