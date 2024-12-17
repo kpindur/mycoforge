@@ -64,7 +64,7 @@ pub fn benchmark(c: &mut Criterion) {
 
     for (min_depth, max_depth) in depths.clone() {
         let init_scheme = Grow::new(min_depth, max_depth);
-        let crossover_scheme = SubtreeCrossover::new(1.0);
+        let crossover_scheme = SubtreeCrossover::new(1.0).expect("Failed to create SubtreeCrossover");
         let trees = (0..pool_size).map(|_| init_scheme.initialize(&mut rng, sampler)).collect::<Vec<TreeGenotype>>();
         group.bench_function(format!("crossover/d{}_{}", min_depth, max_depth),
             |b| b.iter(|| {
@@ -131,7 +131,7 @@ pub fn benchmark(c: &mut Criterion) {
                 config: {
                     init: Grow::new(2, 4),
                     mutation: SubtreeMutation::new(0.1, (1, 2)).expect("Failed to create SubtreeMutation"),
-                    crossover: SubtreeCrossover::new(0.9),
+                    crossover: SubtreeCrossover::new(0.9).expect("Failed to create SubtreeCrossover"),
                     evaluation: MeanSquared::new(),
                     selection: TournamentSelection::new(5)
                 }
