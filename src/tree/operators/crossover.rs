@@ -50,8 +50,11 @@ impl SubtreeCrossover {
             error!("Attempted to crate SubtreeCrossover with invalid probability: {}", probability);
             return Err(CrossoverError::InvalidProbability(probability));
         }
+        info!("Created SubtreeCrossover with probability {}", probability);
         return Ok(Self { probability });
     }
+
+    pub fn probability(&self) -> f64 { return self.probability; }
     
     /// Swaps subtrees between parents at specified crossover points.
     ///
@@ -66,7 +69,7 @@ impl SubtreeCrossover {
         -> Vec<Vec<String>> {
         let (parent1, parent2) = parents;
         let (xo_point1, xo_point2) = crossover_points;
-
+        
         let sub_end1 = parent1.subtree(xo_point1);
         let sub_end2 = parent2.subtree(xo_point2);
 
@@ -88,18 +91,26 @@ impl SubtreeCrossover {
 
 impl Crossoverer<TreeGenotype> for SubtreeCrossover {
     fn variate<R: Rng>(&self, rng: &mut R, parent1: &TreeGenotype, parent2: &TreeGenotype, sampler: &OperatorSampler) -> Vec<TreeGenotype> {
-        if rng.gen::<f64>() > self.probability { return [parent1.clone(), parent2.clone()].to_vec(); }
+        if rng.gen::<f64>() > self.probability { 
+            debug!("Skipping crossover..");
+            return [parent1.clone(), parent2.clone()].to_vec(); 
+        }
 
         let crossover_points: (usize, usize) = (rng.gen_range(0..parent1.arena().len()), rng.gen_range(0..parent2.arena().len()));
         let trees = Self::swap( (parent1, parent2), crossover_points);
-        // Change arena.clone() to &arena in the future
+        debug!("Swapped trees at points: ({}, {}). Trees sizes {} and {} -> {} and {}",
+            crossover_points.0, crossover_points.1, 
+            parent1.arena().len(), parent2.arena().len(), trees[0].len(), trees[1].len()
+        );
         let mut mutants = Vec::new();
         for tree in trees {
             let mut child = TreeGenotype::with_arena(tree.clone());
             *child.children_mut() = child.construct_children(sampler);
             mutants.push(child);
         }
-
+        debug!("Completed crossover: original sizes ({}, {}) -> children sizes ({}, {})",
+            parent1.arena().len(), parent2.arena().len(), mutants[0].arena().len(), mutants[1].arena().len()
+        );
         return mutants;
     }
 }
