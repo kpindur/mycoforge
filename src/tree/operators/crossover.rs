@@ -55,7 +55,8 @@ impl SubtreeCrossover {
     /// Swaps subtrees between parents at specified crossover points.
     ///
     /// # Arguments
-    /// * `parents: (&TreeGenotype, &TreeGenotype)` - parent trees for crossover
+    /// * `parents: (&TreeGenotype, &TreeGenotype)` - parent
+    /// [`trees`][`crate::tree::core::tree::TreeGenotype`] for crossover
     /// * `crossover_points: (usize, usize)` - indices where subtree swap occurs
     ///
     /// # Returns
