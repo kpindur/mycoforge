@@ -46,19 +46,16 @@ impl Selector<TreeGenotype> for TournamentSelection {
     type I = TreeIndividual<TreeGenotype>;
     fn select<R: Rng>(&self, rng: &mut R, population: &[TreeIndividual<TreeGenotype>]) -> TreeGenotype {
         if self.tournament_size > population.len() {
-            error!("Tournament size {} exceeds population size {}!", 
-                self.tournament_size, population.len()
-            );
-            panic!("Tournament size {} exceeds population size {}!",
-                self.tournament_size, population.len()
-            );
+            error!("{}", SelectionError::InvalidTournamentSize((self.tournament_size, population.len())));
+            panic!("{}", SelectionError::InvalidTournamentSize((self.tournament_size, population.len())));
         }
 
         return population.choose_multiple(rng, self.tournament_size)
             .min_by(|a, b| 
                 a.phenotype().partial_cmp(&b.phenotype()
-            ).unwrap_or_else(|| panic!("Fitness comparison failed: {} ? {}", a.phenotype(), b.phenotype())))
-            .expect("Tournament selection failed!")
+            ).unwrap_or_else(|| 
+                panic!("{}", SelectionError::InvalidFitnessComparison((a.phenotype(), b.phenotype())))
+            )).expect("Tournament selection failed!")
             .genotype().clone();
      }
 }
