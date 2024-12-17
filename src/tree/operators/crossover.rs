@@ -8,11 +8,20 @@ pub struct SubtreeCrossover {
     probability: f64,
 }
 
-impl SubtreeCrossover {
-    pub fn new(probability: f64) -> Self {
-        return Self { probability };
+impl Default for SubtreeCrossover {
+    fn default() -> Self {
+        debug!("Creating default SubtreeCrossover with probability {}", 0.7);
+        return Self::new(0.7).expect("Failed to create default SubtreeCrossover!")
     }
+}
 
+    pub fn new(probability: f64) -> Result<Self, CrossoverError> {
+        if !(0.0..=1.0).contains(&probability) { 
+            error!("Attempted to crate SubtreeCrossover with invalid probability: {}", probability);
+            return Err(CrossoverError::InvalidProbability(probability));
+        }
+        return Ok(Self { probability });
+    }
     fn swap(parents: (&TreeGenotype, &TreeGenotype), crossover_points: (usize, usize)) 
         -> Vec<Vec<String>> {
         let (parent1, parent2) = parents;
