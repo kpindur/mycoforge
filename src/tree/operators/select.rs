@@ -12,6 +12,8 @@ pub struct TournamentSelection {
 
 impl TournamentSelection {
     pub fn new(tournament_size: usize) -> Self { return Self { tournament_size }; }
+
+    pub fn tournament_size(&self) -> usize { return self.tournament_size; }
 }
 
 impl Selector<TreeGenotype> for TournamentSelection {
