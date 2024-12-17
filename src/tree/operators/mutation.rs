@@ -137,7 +137,8 @@ impl SizeFairMutation {
     /// * `dynamic_limit: bool` - use subtree size instead of full tree size
     ///
     /// # Returns
-    /// * `Result<Self, MutationError>` - new operator or error if probability invalid
+    /// * `Result<Self, MutationError>` - new operator or
+    /// [`Error`][`crate::tree::operators::errors::MutationError`]
     pub fn new(probability: f64, dynamic_limit: bool) -> Result<Self, MutationError> {
         if !(0.0..=1.0).contains(&probability) {
             error!("Attempted to create SizeFairMutation with invalid probability: {}", probability);
