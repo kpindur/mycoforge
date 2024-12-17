@@ -76,6 +76,9 @@ impl SubtreeMutation {
         info!("Created SubtreeMutation operator with probability {} and depth limits ({}, {})", probability, depth_limits.0, depth_limits.1);
         return Ok(Self { probability, depth_limits });
     }
+
+    pub fn probability(&self) -> f64 { return self.probability; }
+    pub fn depth_limits(&self) -> (usize, usize) { return self.depth_limits; }
 }
 
 impl Mutator<TreeGenotype> for SubtreeMutation {
@@ -147,6 +150,9 @@ impl SizeFairMutation {
         info!("Created SizeFairMutation operator with probability {} and dynamic limit {}", probability, dynamic_limit);
         return Ok(Self { probability, dynamic_limit });
     }
+
+    pub fn probability(&self) -> f64 { return self.probability; }
+    pub fn dynamic_limit(&self) -> bool { return self.dynamic_limit; }
 
     /// Calculates depth limits based on tree or subtree size.
     ///
@@ -232,6 +238,8 @@ impl PointMutation {
         info!("Created PointMutation operator with probability {}", probability);
         return Ok(Self { probability });
     }
+
+    pub fn probability(&self) -> f64 { return self.probability; }
 }
 
 impl Mutator<TreeGenotype> for PointMutation {
@@ -320,6 +328,10 @@ impl ConstantMutation {
         );
         return Ok(Self { probability, mutation_rate, range_limits });
     }
+
+    pub fn probability(&self) -> f64 { return self.probability; }
+    pub fn mutation_rate(&self) -> f64 { return self.mutation_rate; }
+    pub fn range_limits(&self) -> Option<(f64, f64)> { return self.range_limits; }
 }
 
 impl Mutator<TreeGenotype> for ConstantMutation {
