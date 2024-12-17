@@ -36,6 +36,9 @@ impl Grow {
     pub fn new(min_depth: usize, max_depth: usize) -> Self {
         return Self { min_depth, max_depth };
     }
+
+    pub fn min_depth(&self) -> usize { return self.min_depth; }
+    pub fn max_depth(&self) -> usize { return self.max_depth; }
 }
 
 impl Initializer<TreeGenotype> for Grow {
@@ -102,6 +105,8 @@ pub struct Full {
 
 impl Full {
     pub fn new(depth: usize) -> Self { return Self { depth }; }
+
+    pub fn depth(&self) -> usize { return self.depth; }
 }
 
 impl Initializer<TreeGenotype> for Full {
