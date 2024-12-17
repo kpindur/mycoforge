@@ -5,6 +5,7 @@
 
 use core::panic;
 
+use log::error;
 use rand::Rng;
 use rand::seq::SliceRandom;
 
@@ -45,6 +46,9 @@ impl Selector<TreeGenotype> for TournamentSelection {
     type I = TreeIndividual<TreeGenotype>;
     fn select<R: Rng>(&self, rng: &mut R, population: &[TreeIndividual<TreeGenotype>]) -> TreeGenotype {
         if self.tournament_size > population.len() {
+            error!("Tournament size {} exceeds population size {}!", 
+                self.tournament_size, population.len()
+            );
             panic!("Tournament size {} exceeds population size {}!",
                 self.tournament_size, population.len()
             );
