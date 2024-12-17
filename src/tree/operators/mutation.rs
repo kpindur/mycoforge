@@ -45,7 +45,22 @@ fn substitute(individual: &TreeGenotype, subtree: &TreeGenotype, mutation_point:
 /// ```
 /// use mycoforge::tree::operators::mutation::SubtreeMutation;
 ///
-/// let mutation = SubtreeMutation::default();
+/// let default_mutation = SubtreeMutation::default();
+///
+/// let custom_mutation = SubtreeMutation::new(0.1, (1, 2))
+///     .expect("Failed to create SubtreeMutation with custom arguments!");
+///
+/// assert_eq!(default_mutation.probability(), custom_mutation.probability(),
+///     "Probabilities do not much! Expected {}, found ({}, {})",
+///     0.1, 
+///     default_mutation.probability(), custom_mutation.probability()
+/// );
+/// assert_eq!(default_mutation.depth_limits(), custom_mutation.depth_limits(),
+///     "Depth limits do not much! Expected ({}, {}), found ({}, {}) and ({}, {})",
+///     1, 2,
+///     default_mutation.depth_limits().0, default_mutation.depth_limits().1,
+///     custom_mutation.depth_limits().0, custom_mutation.depth_limits().1
+/// );
 /// ```
 pub struct SubtreeMutation {
     probability: f64,
@@ -118,7 +133,19 @@ impl Mutator<TreeGenotype> for SubtreeMutation {
 /// ```
 /// use mycoforge::tree::operators::mutation::SizeFairMutation;
 ///
-/// let mutation = SizeFairMutation::default();
+/// let default_mutation = SizeFairMutation::default();
+///
+/// let custom_mutation = SizeFairMutation::new(0.1, false)
+///     .expect("Failed to create SizeFairMutation with custom arguments!");
+///
+/// assert_eq!(default_mutation.probability(), custom_mutation.probability(),
+///     "Probabilities do not match! Expected {}, found ({}, {})",
+///     0.1, default_mutation.probability(), custom_mutation.probability()
+/// );
+/// assert_eq!(default_mutation.dynamic_limit(), custom_mutation.dynamic_limit(),
+///     "Dynamic limits do not match! Expected {}, found ({}, {})",
+///     false, default_mutation.dynamic_limit(), custom_mutation.dynamic_limit()
+/// );
 /// ```
 pub struct SizeFairMutation {
     probability: f64,
@@ -209,7 +236,16 @@ impl Mutator<TreeGenotype> for SizeFairMutation {
 /// ```
 /// use mycoforge::tree::operators::mutation::PointMutation;
 ///
-/// let mutation = PointMutation::default();
+/// let default_mutation = PointMutation::default();
+///
+/// let custom_mutation = PointMutation::new(0.1)
+///     .expect("Failed to create PointMutation with custom arguments!");
+///
+/// assert_eq!(default_mutation.probability(), custom_mutation.probability(),
+///     "Probabilities do not match! Expected {}, found ({}, {})",
+///     0.1, default_mutation.probability(), custom_mutation.probability()
+/// );
+///
 /// ```
 pub struct PointMutation {
     probability: f64
@@ -281,8 +317,25 @@ impl Mutator<TreeGenotype> for PointMutation {
 /// ```
 /// use mycoforge::tree::operators::mutation::ConstantMutation;
 ///
-/// let mutation = ConstantMutation::default();
-/// ```
+/// let default_mutation = ConstantMutation::default();
+///
+/// let custom_mutation = ConstantMutation::new(0.1, 0.1, None)
+///     .expect("Failed to create ConstantMutation with custom arguments!");
+///
+/// assert_eq!(default_mutation.probability(), custom_mutation.probability(),
+///     "Probabilities do not match! Expected {}, found ({}, {})",
+///     0.1, default_mutation.probability(), custom_mutation.probability()
+/// );
+///
+/// assert_eq!(default_mutation.mutation_rate(), custom_mutation.mutation_rate(),
+///     "Mutation rates do not match! Expected {}, found ({}, {})",
+///     0.1, default_mutation.mutation_rate(), custom_mutation.mutation_rate()
+/// );
+///
+/// assert_eq!(default_mutation.range_limits(), custom_mutation.range_limits(),
+///     "Range limits do not match! Expected {:?}, found ({:?}, {:?})",
+///     None::<(f64, f64)>, default_mutation.range_limits(), custom_mutation.range_limits()
+/// );
 pub struct ConstantMutation {
     probability: f64,
     mutation_rate: f64,
