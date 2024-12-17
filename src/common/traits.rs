@@ -3,7 +3,7 @@ use std::fmt::Display;
 use rand::Rng;
 use std::collections::HashMap;
 
-use crate::{operators::sampler::OperatorSampler, tree::core::tree::TreeGenotype};
+use crate::operators::sampler::OperatorSampler;
 use crate::common::types::VectorFunction;
 
 pub trait Genotype: Clone + Display {}
@@ -36,7 +36,7 @@ pub trait Evaluator<G: Genotype> {
     fn memoized_evaluate(&self, 
         tree: &G, data: &Self::D, 
         map: &HashMap<String, (usize, VectorFunction)>,
-        cache: &HashMap<TreeGenotype, f64>
+        cache: &HashMap<G, f64>
     ) -> f64;
 }
 
