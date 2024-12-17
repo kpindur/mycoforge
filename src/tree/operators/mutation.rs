@@ -1,7 +1,7 @@
-//! Tree mutation operators for Genetic Programming (GP)
+//! Tree mutation operators for Genetic Programming
 //!
 //! This module provides mutation operators for tree-based GP designed for manipulating
-//! `TreeGenotype` structure. Also serves as a template for custom mutation operators.
+//! [`TreeGenotype`][`crate::tree::core::tree::TreeGenotype`] structure. Also serves as a template for custom mutation operators.
 
 use rand::Rng;
 
@@ -14,7 +14,15 @@ use super::init::Grow;
 use super::errors::MutationError;
 use log::{info, error, debug};
 
-/// Replaces a subtree at the specified mutation point in the individual with a new subtree
+/// Substitutes a subtree at the given mutation point with a new subtree.
+///
+/// # Arguments
+/// * `individual: &TreeGenotype` - original [`TreeGenotype`][`crate::tree::core::tree::TreeGenotype`]
+/// * `subtree: &TreeGenotype` - new subtree to insert
+/// * `mutation_point: usize` - index where substitution occurs
+///
+/// # Returns
+/// * `Vec<String>` - new tree arena after substitution
 fn substitute(individual: &TreeGenotype, subtree: &TreeGenotype, mutation_point: usize) 
     -> Vec<String> {
     let mutation_end: usize = individual.subtree(mutation_point);
@@ -52,6 +60,14 @@ impl Default for SubtreeMutation {
 }
 
 impl SubtreeMutation {
+    /// Creates new SubtreeMutation operator.
+    ///
+    /// # Arguments
+    /// * `probability: f64` - mutation probability (0.0 to 1.0)
+    /// * `depth_limits: (usize, usize)` - min and max depth for new subtrees
+    ///
+    /// # Returns
+    /// * `Result<Self, MutationError>` - new operator or error if probability invalid
     pub fn new(probability: f64, depth_limits: (usize, usize)) -> Result<Self, MutationError> {
         if !(0.0..=1.0).contains(&probability) {
             error!("Attempted to crate SubtreeMutation with invalid probability: {}", probability);
@@ -63,10 +79,6 @@ impl SubtreeMutation {
 }
 
 impl Mutator<TreeGenotype> for SubtreeMutation {
-    /// Performs subtree mutation on the given individual.
-    ///
-    /// Return the original individual unchanged if random number exceeds probability.
-    /// Otherwise return mutated individual.
     fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
         if rng.gen::<f64>() > self.probability { 
             debug!("Skipping mutation..");
@@ -118,6 +130,14 @@ impl Default for SizeFairMutation {
 }
 
 impl SizeFairMutation {
+    /// Creates new SizeFairMutation operator.
+    ///
+    /// # Arguments
+    /// * `probability: f64` - mutation probability (0.0 to 1.0)
+    /// * `dynamic_limit: bool` - use subtree size instead of full tree size
+    ///
+    /// # Returns
+    /// * `Result<Self, MutationError>` - new operator or error if probability invalid
     pub fn new(probability: f64, dynamic_limit: bool) -> Result<Self, MutationError> {
         if !(0.0..=1.0).contains(&probability) {
             error!("Attempted to create SizeFairMutation with invalid probability: {}", probability);
@@ -126,10 +146,15 @@ impl SizeFairMutation {
         info!("Created SizeFairMutation operator with probability {} and dynamic limit {}", probability, dynamic_limit);
         return Ok(Self { probability, dynamic_limit });
     }
-    /// Calculates minimum and maximum depths based on tree size.
+
+    /// Calculates depth limits based on tree or subtree size.
     ///
-    /// When `dynamic_limit` is true, uses the size of the subtree at `mutation_point`.
-    /// Otherwise, uses the size of the entire tree.
+    /// # Arguments
+    /// * `tree: &TreeGenotype` - tree to calculate limits for
+    /// * `mutation_point: usize` - point of mutation (used with dynamic_limit)
+    ///
+    /// # Returns
+    /// * `(usize, usize)` - calculated (min, max) depth limits
     fn calculate_depths(&self, tree: &TreeGenotype, mutation_point: usize) -> (usize, usize) {
         let tree_size = if self.dynamic_limit {
             let subtree_end = tree.subtree(mutation_point);
@@ -146,10 +171,6 @@ impl SizeFairMutation {
 }
 
 impl Mutator<TreeGenotype> for SizeFairMutation {
-    /// Performs size-fair mutation on the given individual.
-    ///
-    /// Returns the original individual unchanged if random number exceeds probability.
-    /// Otherwise returns mutated individual.
     fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
         if rng.gen::<f64>() > self.probability {
             debug!("Skipping mutation");
@@ -195,6 +216,13 @@ impl Default for PointMutation {
 }
 
 impl PointMutation {
+    /// Creates new PointMutation operator.
+    ///
+    /// # Arguments
+    /// * `probability: f64` - mutation probability (0.0 to 1.0)
+    ///
+    /// # Returns
+    /// * `Result<Self, MutationError>` - new operator or error if probability invalid
     pub fn new(probability: f64) -> Result<Self, MutationError> {
         if !(0.0..=1.0).contains(&probability) {
             error!("Attempted to create PointMutation with invalid probability: {}", probability);
@@ -206,10 +234,6 @@ impl PointMutation {
 }
 
 impl Mutator<TreeGenotype> for PointMutation {
-    /// Performs point mutation on the given individual.
-    ///
-    /// Returns the original individual unchanged if random number exceeds probability.
-    /// Otherwise returns mutated individual.
     fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
         if rng.gen::<f64>() > self.probability { 
             debug!("Skipping mutation..");
@@ -237,6 +261,19 @@ impl Mutator<TreeGenotype> for PointMutation {
     }
 }
 
+/// Mutation operator that modifies constant values in the tree by a random factor.
+///
+/// # Fields
+/// * `probability: f64` - Mutation probability (0.0 to 1.0)
+/// * `mutation_rate: f64` - Maximum relative change in constant value
+/// * `range_limits: Option<(f64, f64)>` - Optional min and max bounds for constants
+///
+/// # Examples
+/// ```
+/// use mycoforge::tree::operators::mutation::ConstantMutation;
+///
+/// let mutation = ConstantMutation::default();
+/// ```
 pub struct ConstantMutation {
     probability: f64,
     mutation_rate: f64,
@@ -253,6 +290,15 @@ impl Default for ConstantMutation {
 }
 
 impl ConstantMutation {
+    /// Creates new ConstantMutation operator.
+    ///
+    /// # Arguments
+    /// * `probability: f64` - mutation probability (0.0 to 1.0)
+    /// * `mutation_rate: f64` - maximum relative change in constant value
+    /// * `range_limits: Option<(f64, f64)>` - optional min and max bounds
+    ///
+    /// # Returns
+    /// * `Result<Self, MutationError>` - new operator or error if probability/rate invalid
     pub fn new(probability: f64, mutation_rate: f64, range_limits: Option<(f64, f64)>) -> Result<Self, MutationError> {
         if !(0.0..=1.0).contains(&probability) {
             error!("Attempted to create ConstantMutation with invalid probability: {}", probability);
