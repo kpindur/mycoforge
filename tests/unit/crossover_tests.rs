@@ -68,8 +68,9 @@ fn test_subtree_crossover(sample_sampler: OperatorSampler) {
             );
         }
         
-        let crossover = SubtreeCrossover::new(1.0);
-        let mut children = crossover.variate(&mut rng, &parent1, &parent2, &sample_sampler);
+        let crossover = SubtreeCrossover::new(1.0).expect("Failed to create SubtreeCrossover!");
+        let mut children = crossover
+            .variate(&mut rng, &parent1, &parent2, &sample_sampler);
         
         for child in &mut children {
             *child.children_mut() = child.construct_children(&sample_sampler);
