@@ -26,6 +26,16 @@ use crate::operators::sampler::{OperatorSampler, Sampler};
 /// use mycoforge::tree::operators::init::Grow;
 /// 
 /// let initializer = Grow::new(1, 2); // min_depth=1, max_depth=2
+///
+/// assert_eq!(initializer.min_depth(), 1,
+///     "Minimum depths do not match! Expected {}, found {}",
+///     1, initializer.min_depth()
+/// );
+///
+/// assert_eq!(initializer.max_depth(), 2,
+///     "Maximum depths do not match! Expected {}, found {}",
+///     2, initializer.max_depth()
+/// );
 /// ```
 pub struct Grow {
     min_depth: usize,
@@ -97,7 +107,12 @@ impl Initializer<TreeGenotype> for Grow {
 /// ```
 /// use mycoforge::tree::operators::init::Full;
 ///
-/// let init = Full::new(2); // depth=2
+/// let initializer = Full::new(2); // depth=2
+///
+/// assert_eq!(initializer.depth(), 2,
+///     "Depths do not match! Expected {}, found {}",
+///     2, initializer.depth()
+/// );
 /// ```
 pub struct Full {
     depth: usize
