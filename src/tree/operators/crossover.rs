@@ -4,7 +4,6 @@
 //! [`TreeGenotype`][`crate::tree::core::tree::TreeGenotype`] structure. 
 //! Also serves as a template for custom crossover operators.
 
-use std::error::Error;
 use rand::Rng;
 
 use crate::common::traits::Crossoverer;
@@ -41,6 +40,10 @@ impl SubtreeCrossover {
     ///
     /// # Arguments
     /// * `probability: f64` - crossover probability (0.0 to 1.0)
+    ///
+    /// # Returns
+    /// * `Result<Self, CrossoverError>` - instance of Self or an
+    /// [`Error`][`crate::tree::operators::errors::CrossoverError`]
     pub fn new(probability: f64) -> Result<Self, CrossoverError> {
         if !(0.0..=1.0).contains(&probability) { 
             error!("Attempted to crate SubtreeCrossover with invalid probability: {}", probability);
