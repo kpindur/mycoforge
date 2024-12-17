@@ -21,7 +21,7 @@ pub trait Genotype: Clone + Display {}
 /// [`OperatorSampler`][`crate::operators::sampler::OperatorSampler`]
 ///
 /// # Returns
-/// * G - newly initialized genotype
+/// * `G` - newly initialized genotype
 pub trait Initializer<G: Genotype> {
     fn initialize<R: Rng>(&self, rng: &mut R, sampler: &OperatorSampler) -> G;
 }
@@ -35,7 +35,7 @@ pub trait Initializer<G: Genotype> {
 /// [`OperatorSampler`][`crate::operators::sampler::OperatorSampler`]
 ///
 /// # Returns
-/// * G - mutated individual
+/// * `G` - mutated individual
 pub trait Mutator<G: Genotype> {
     fn variate<R: Rng>(&self, rng: &mut R, individual: &G, sampler: &OperatorSampler) -> G;
 }
@@ -50,7 +50,7 @@ pub trait Mutator<G: Genotype> {
 /// [`OperatorSampler`][`crate::operators::sampler::OperatorSampler`]
 ///
 /// # Returns
-/// * Vec<G> - two crossed over individuals, first individual with subtree from the second
+/// * `Vec<G>` - two crossed over individuals, first individual with subtree from the second
 /// individual and second individual with subtree from the first individual
 pub trait Crossoverer<G: Genotype> {
     fn variate<R: Rng>(&self, rng: &mut R, parent1: &G, parent2: &G, sampler: &OperatorSampler) -> Vec<G>;
@@ -101,7 +101,7 @@ pub trait Evaluator<G: Genotype> {
 /// [`Individual`][`crate::common::traits::Individual`]
 ///
 /// # Returns
-/// * G - selected [`Genotype`][`crate::common::traits::Genotype`]
+/// * `G` - selected [`Genotype`][`crate::common::traits::Genotype`]
 pub trait Selector<G: Genotype> {
     type I: Individual<G>;
 
