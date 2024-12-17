@@ -22,7 +22,16 @@ use log::{error, debug, info};
 /// ```
 /// use mycoforge::tree::operators::crossover::SubtreeCrossover;
 ///
-/// let crossover = SubtreeCrossover::new(0.9);
+/// let default_crossover = SubtreeCrossover::default(); // probability=0.7
+///
+/// let custom_crossover = SubtreeCrossover::new(0.7) // probability=0.7
+///     .expect("Failed to create with custom probability");
+/// 
+/// assert_eq!(default_crossover.probability(), custom_crossover.probability(),
+///     "Probabilities do not match! Expected ({}, {}), found ({}, {})",
+///     0.7, 0.7,
+///     default_crossover.probability(), custom_crossover.probability()
+/// );
 /// ```
 #[derive(Debug)]
 pub struct SubtreeCrossover {
