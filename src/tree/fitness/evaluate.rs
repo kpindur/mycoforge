@@ -22,7 +22,7 @@ use crate::dataset::core::Dataset;
 ///
 /// # Examples
 /// ```
-/// use mycoforge::tree::operators::evaluator::MeanSquared;
+/// use mycoforge::tree::fitness::evaluate::MeanSquared;
 ///
 /// let evaluator = MeanSquared::default(); // Empty just for method encapsulation
 /// ```
