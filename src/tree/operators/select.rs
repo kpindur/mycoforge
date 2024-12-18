@@ -11,6 +11,7 @@ use rand::seq::SliceRandom;
 
 use crate::common::traits::{Individual, Selector};
 use crate::tree::core::{tree::TreeGenotype, individual::TreeIndividual};
+use crate::tree::operators::errors::SelectionError;
 
 /// Tournament selection operator that selects best individual from random subset.
 ///
