@@ -35,3 +35,22 @@ impl fmt::Display for CrossoverError {
         }
     }
 }
+
+#[derive(Debug)]
+pub enum SelectionError {
+    InvalidTournamentSize((usize, usize)),
+    InvalidFitnessComparison((f64, f64))
+}
+
+impl Error for SelectionError {}
+
+impl fmt::Display for SelectionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            SelectionError::InvalidTournamentSize((tournament_size, population_size))
+                => write!(f, "Tournament size {} exceeds population size {}!", tournament_size, population_size),
+            SelectionError::InvalidFitnessComparison((a, b))
+                => write!(f, "Invalid fitness comparison: {} ? {}", a, b)
+        }
+    }
+}
