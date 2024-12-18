@@ -100,7 +100,7 @@ impl Display for TreeGenotype {
 }
 
 impl Default for TreeGenotype {
-    fn default() -> Self { return Self { arena: Vec::new(), children: HashMap::new() }; }
+    fn default() -> Self { return Self::new(Vec::new(), HashMap::new()); }
 }
 
 impl Hash for TreeGenotype {
