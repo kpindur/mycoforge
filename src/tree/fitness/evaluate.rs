@@ -1,3 +1,12 @@
+//! Evaluation functions for Genetic Programming
+//!
+//! This module provides evaluator for GP algorithms designed for assessing 
+//! fitness of [`TreeGenotype`][`crate::tree::core::tree::TreeGenotype`]
+//!
+//! Currently implmeneted:
+//! - Mean Squared Error (MSE)
+//!
+//! Also serves as a template for custom evaluation functions.
 use std::collections::HashMap;
 
 use crate::common::traits::Data;
@@ -8,9 +17,19 @@ use crate::dataset::core::Dataset;
 //Root Mean Squared Error (RMSE)
 //Mean Absolute Error (MAE)
 
+/// Mean Squared Error (MSE) evaluator that computes fitness as average squared
+/// difference between predicted and actual values.
+///
+/// # Examples
+/// ```
+/// use mycoforge::tree::operators::evaluator::MeanSquared;
+///
+/// let evaluator = MeanSquared::default(); // Empty just for method encapsulation
+/// ```
 pub struct MeanSquared {}
 
 impl MeanSquared {
+    // Creates new MeanSquared evaluator.
     pub fn new() -> Self { return Self {}; }
 }
 
