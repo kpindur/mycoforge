@@ -1,3 +1,8 @@
+//! Core tree structure for tree-based Genetic Programming
+//!
+//! This module provides the [`TreeGenotype`] structure that represents programs as trees using a
+//! linear array (arena) in postfix notation with explicit child references.
+use std::fmt::Write;
 use std::hash::{Hash, Hasher};
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter, Result};
@@ -5,6 +10,12 @@ use std::fmt::{Display, Formatter, Result};
 use crate::common::traits::Genotype;
 use crate::operators::sampler::OperatorSampler;
 
+/// Tree structure for representing programs in Genetic Programming.
+/// Uses arena=based representation with hashmap of parent-child relationships.
+///
+/// # Fields
+/// * `arena: Vec<String>` - flat array storing nodes (operators and terminals) in postfix order
+/// * `children: HashMap<usize, Vec<usize>>` - maps parent indices to their children indices
 #[derive(Clone)]
 pub struct TreeGenotype {
     arena: Vec<String>,
@@ -14,7 +25,9 @@ pub struct TreeGenotype {
 impl Genotype for TreeGenotype {}
 
 impl TreeGenotype {
+    /// Creates new tree with provided arena and children mapping.
     pub fn new(arena: Vec<String>, children: HashMap<usize, Vec<usize>>) -> Self { return Self { arena, children }; }
+    /// Creates new tree with provided arena and empty children mapping.
     pub fn with_arena(arena: Vec<String>) -> Self { return Self { arena, children: HashMap::new() }; }
 
     pub fn arena(&self) -> &Vec<String> { return &self.arena; }
@@ -22,6 +35,13 @@ impl TreeGenotype {
     pub fn children(&self) -> &HashMap<usize, Vec<usize>> { return &self.children; }
     pub fn children_mut(&mut self) -> &mut HashMap<usize, Vec<usize>> { return &mut self.children; }
 
+    /// Returns index of last node in subtree rooted at given index.
+    ///
+    /// # Arguments
+    /// * `root: usize` - index of subtree root
+    ///
+    /// # Returns
+    /// * `usize` - index of last node in subtree
     pub fn subtree(&self, root: usize) -> usize {
         let mut stack = vec![root];
         let mut last_visited = root;
@@ -34,7 +54,14 @@ impl TreeGenotype {
         }
         return last_visited;
     }
-
+    
+    /// Constructs children mapping from flat arena representation.
+    ///
+    /// # Arguments
+    /// * `sampler: &OperatorSampler` - provides operator arities and labels for tree construction
+    ///
+    /// # Returns
+    /// * `HashMap<usize, Vec<usiz>>` - mapping of parent indices to children indices
     pub fn construct_children(&self, sampler: &OperatorSampler) -> HashMap<usize, Vec<usize>> {
         let mut children = HashMap::new();
         let operators = sampler.operators();
