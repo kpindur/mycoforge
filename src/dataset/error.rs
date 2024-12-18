@@ -3,7 +3,6 @@
 //! This modules provides error types for handling various dataset-related errors, from file
 //! operations to data validation.
 
-
 /// Errors that can occur during dataset operations.
 ///
 /// # Variants
