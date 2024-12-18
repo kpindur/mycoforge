@@ -1,6 +1,13 @@
+//! Error types used across operator implementations.
+
 use std::fmt;
 use std::error::Error;
 
+/// Errors that can occur during mutation operations.
+///
+/// # Variants
+/// * `InvalidProbability(f64)` - mutation probability outside [0.0, 1.0] range
+/// * `InvalidMutationRate(f64)` - mutation rate outside [0.0, 1.0] range
 #[derive(Debug)]
 pub enum MutationError {
     InvalidProbability(f64),
@@ -20,6 +27,10 @@ impl fmt::Display for MutationError {
     }
 }
 
+/// Errors that can occur during crossover operations.
+/// 
+/// # Variants
+/// * `InvalidProbability(f64)` - crossover probability outside [0.0, 1.0] range
 #[derive(Debug)]
 pub enum CrossoverError {
     InvalidProbability(f64)
@@ -36,6 +47,11 @@ impl fmt::Display for CrossoverError {
     }
 }
 
+/// Errors that can occur during selection operations.
+///
+/// # Variants
+/// * `InvalidTournamentSize((usize, usize))` - tournament size exceeds population size
+/// * `InvalidFitnessComparison((f64, f64))` - failed to compare fitness values
 #[derive(Debug)]
 pub enum SelectionError {
     InvalidTournamentSize((usize, usize)),
