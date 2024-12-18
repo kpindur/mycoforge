@@ -1,3 +1,19 @@
+//! Error types for dataset handling.
+//!
+//! This modules provides error types for handling various dataset-related errors, from file
+//! operations to data validation.
+
+
+/// Errors that can occur during dataset operations.
+///
+/// # Variants
+/// * `FileNotFound(String)` - Specified file path not found
+/// * `InvalidFormat(String)` - Dataset format is invalid
+/// * `MissingColumn(String)` - Required column is missing
+/// * `ParseError(String)` - Failed to parse data value
+/// * `EmptyDataset` - Dataset contains no data
+/// * `DimensionMismatch` - Number of dimensions doesn't match expected
+/// * `IoError(std::io::Error)` - IO operation failed
 #[derive(Debug)]
 pub enum DatasetError {
     FileNotFound(String),
