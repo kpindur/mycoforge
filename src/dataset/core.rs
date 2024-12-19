@@ -1,3 +1,4 @@
+//! Core dataset structures for handling training and test data.
 use rand::Rng;
 use rand::seq::index::sample;
 
@@ -14,6 +15,13 @@ use super::loaders::csv_loader::load_csv;
 //    Stratified
 //}
 
+/// Dataset structure holding feature names and split data vectors.
+///
+/// # Fields
+/// * `feature_names: Vec<String>` - names of features in dataset
+/// * `no_dims: usize` - number of input dimensions (excluding target)
+/// * `test_data: Vec<Vec<f64>>` - test set feature vectors
+/// * `train_data: Vec<Vec<f64>>` - training set feature vectors
 pub struct Dataset {
     feature_names: Vec<String>,
     no_dims: usize,
@@ -22,16 +30,39 @@ pub struct Dataset {
 }
 
 impl Dataset {
+    /// Creates new dataset with provided fields.
+    ///
+    /// # Arguments
+    /// * `feature_names: Vec<String>` - names of features
+    /// * `no_dims: usize` - number of input dimensions
+    /// * `test_data` - test set feature vectors
+    /// * `train_data` - training set feature vectors
     pub fn new(feature_names: Vec<String>, no_dims: usize, test_data: Vec<Vec<f64>>, train_data: Vec<Vec<f64>>) -> Self {
         return Self { feature_names, no_dims, test_data, train_data }
     }
 
+    /// Loads dataset from CSV file and splits into train/test sets.
+    ///
+    /// # Arguments
+    /// * `rng: &mut R` - [`random number generator`][`rand::Rng`]
+    /// * `path: &str` - path to csv file
+    /// * `test_ratio: f64` - ratio of data to use for testing
+    ///
+    /// # Returns
+    /// * `Result<Self, DatasetError>` - new dataset or error if loading fails
     pub fn from_csv<R: Rng>(rng: &mut R, path: &str, test_ratio: f64) -> Result<Self, DatasetError> {
         let (header, columns) = load_csv(path.as_ref())?;
 
         return Ok(Self::from_vector(rng, header, columns, test_ratio));
     }
 
+    /// Creates dataset from vector data and splits into train/test sets.
+    ///
+    /// # Arguments
+    /// * `rng: &mut R` - [`random number generator`][`rand::Rng`]
+    /// * `feature_names` - names of features
+    /// * `vectors: Vec<Vec<f64>>` - feature vectors
+    /// * `test_ratio: f64` - ratio of data to use for testing
     pub fn from_vector<R: Rng>(rng: &mut R, feature_names: Vec<String>, vectors: Vec<Vec<f64>>, test_ratio: f64) -> Self {
         let no_dims = vectors.len() - 1;
         
@@ -44,6 +75,15 @@ impl Dataset {
     pub fn test_data(&self)     -> &Vec<Vec<f64>> { return &self.test_data; }
     pub fn train_data(&self)    -> &Vec<Vec<f64>> { return &self.train_data; }
 
+    /// Separates data into train and test sets.
+    ///
+    /// # Arguments
+    /// * `rng: &mut R` - [`random number generator`][`rand::Rng`]
+    /// * `data: &[Vec<f64>]` - data to split
+    /// * `test_ration: f64` - ratio of data to use for testing
+    ///
+    /// # Returns
+    /// * `(Vec<Vec<f64>>, Vec<Vec<f64>>)` - (test_data, train_data) tuple
     fn separate<R: Rng>(rng: &mut R, data: &[Vec<f64>], test_ratio: f64) -> (Vec<Vec<f64>>, Vec<Vec<f64>>) {
         let n_samples = data[0].len();
         let test_size = (n_samples as f64 * test_ratio).ceil() as usize;
