@@ -1,10 +1,26 @@
+//! Operator sampling functionality for Genetic Programming.
+//!
+//! This module provides structures for weighted random sampling of operators based on their
+//! arities and weights.
+
 use rand::prelude::*;
 use rand::distributions::WeightedIndex;
 
+/// Interface for sampling operators.
 pub trait Sampler {
+    /// Samples random operator.
+    ///
+    /// # Returns
+    /// * `(String, usize)` - (operator name, arity) tuple
     fn sample<R: Rng>(&self, rng: &mut R) -> (String, usize);
 }
 
+/// Sampler for operators with weights and arity constraints.
+///
+/// # Fields
+/// * `operators: Vec<String>` - list of operator names
+/// * `arity: Vec<usize>` - list of operator arities
+/// * `weights: Vec<f64>` - list of sampling weights
 #[derive(Clone)]
 pub struct OperatorSampler {
     operators: Vec<String>,
@@ -20,12 +36,24 @@ impl OperatorSampler {
     pub fn operators(&self) -> &Vec<String> { return &self.operators; }
     pub fn arities(&self) -> &Vec<usize> { return &self.arity; }
     pub fn weights(&self) -> &Vec<f64> { return &self.weights; }
-
+    
+    /// Updates sampling weights.
+    ///
+    /// # Panic
+    /// * If new weights length doesn't match current weights
     pub fn update_weights(&mut self, weights: Vec<f64>) {
         assert_eq!(self.weights.len(), weights.len());
         self.weights = weights;
     }
 
+    /// Creates new sampler with operators filtered by arity range.
+    ///
+    /// # Arguments
+    /// * `min_arity: usize` - minimum allowed arity
+    /// * `max_arity: usize` - maximum allowed arity
+    ///
+    /// # Returns
+    /// * [`OperatorSampler`] - new sampler containing only operators with arities in range
     pub fn sampler_with_arity(&self, min_arity: usize, max_arity: usize) -> OperatorSampler {
         let is_valid = |arity| -> bool {
             return arity >= min_arity && arity <= max_arity;
