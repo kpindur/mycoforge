@@ -7,6 +7,9 @@ use std::hash::{Hash, Hasher};
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter, Result};
 
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize};
+
 use crate::common::traits::Genotype;
 use crate::operators::sampler::OperatorSampler;
 
@@ -16,6 +19,7 @@ use crate::operators::sampler::OperatorSampler;
 /// # Fields
 /// * `arena: Vec<String>` - flat array storing nodes (operators and terminals) in postfix order
 /// * `children: HashMap<usize, Vec<usize>>` - maps parent indices to their children indices
+#[cfg_attr(feature = "serder", derive(Serialize, Deserialize))]
 #[derive(Clone)]
 pub struct TreeGenotype {
     arena: Vec<String>,
