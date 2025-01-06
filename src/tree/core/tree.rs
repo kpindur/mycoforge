@@ -19,7 +19,7 @@ use crate::operators::sampler::OperatorSampler;
 /// # Fields
 /// * `arena: Vec<String>` - flat array storing nodes (operators and terminals) in postfix order
 /// * `children: HashMap<usize, Vec<usize>>` - maps parent indices to their children indices
-#[cfg_attr(feature = "serder", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Clone)]
 pub struct TreeGenotype {
     arena: Vec<String>,
