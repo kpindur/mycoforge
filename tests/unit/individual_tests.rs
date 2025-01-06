@@ -1,8 +1,12 @@
 use std::fmt::{Display, Formatter, Result};
 
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize};
+
 use mycoforge::common::traits::{Genotype, Individual};
 use mycoforge::tree::core::individual::*;
 
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Clone, PartialEq, Debug)]
 struct MockGenotype;
 impl Genotype for MockGenotype {}
@@ -50,4 +54,50 @@ fn test_to_genotype_vec() {
 
     assert_eq!(2, genotypes.len());
     assert_eq!(MockGenotype, genotypes[0]);
+}
+
+#[cfg(feature = "serde")]
+#[test]
+fn test_tree_individual_serialization() {
+    use serde_json;
+    let individual = TreeIndividual::new(MockGenotype, 42.0);
+
+    let serialized = serde_json::to_string(&individual)
+        .expect("Failed to serialize individual!");
+    let deserialized: TreeIndividual<MockGenotype> = serde_json::from_str(&serialized)
+        .expect("Failed to deserialzie individual!");
+
+    assert_eq!(*deserialized.genotype(), MockGenotype,
+        "Deserialized genotype is different! Expected {}, found {}",
+        MockGenotype, *deserialized.genotype()
+    );
+    assert_eq!(deserialized.phenotype(), 42.0,
+        "Deserialized phenotype is different! Expected {}, found {}",
+        42.0, deserialized.phenotype()
+    );
+
+    let individuals = vec![
+        TreeIndividual::new(MockGenotype, 1.0),
+        TreeIndividual::new(MockGenotype, 2.0)
+    ];
+
+    let serialized = serde_json::to_string(&individuals)
+        .expect("Failed to serialize individuals!");
+    let deserialized: Vec<TreeIndividual<MockGenotype>> = serde_json::from_str(&serialized)
+        .expect("Failed to deserialize individuals!");
+
+    for value in &deserialized {
+        assert_eq!(*value.genotype(), MockGenotype,
+            "Deserialized genotype is different! Expected {}, found {}",
+            MockGenotype, *value.genotype()
+        );
+    }
+    assert_eq!(deserialized[0].phenotype(), 1.0, 
+        "Deserialized phenotype is different! Expected {}, found {}", 
+        1.0, deserialized[0].phenotype()
+    );
+    assert_eq!(deserialized[1].phenotype(), 2.0, 
+        "Deserialized phenotype is different! Expected {}, found {}", 
+        2.0, deserialized[1].phenotype()
+    );
 }
