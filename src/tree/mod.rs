@@ -11,12 +11,14 @@ pub mod operators;
 
 pub mod fitness;
 
-pub use self::core::tree::TreeGenotype;
-pub use self::core::individual::TreeIndividual;
-pub use self::operators::{
-    init::*,
-    mutation::*,
-    crossover::*,
-    select::*
-};
-pub use self::fitness::evaluate::*;
+pub mod components {
+    pub use super::core::tree::TreeGenotype;
+    pub use super::core::individual::TreeIndividual;
+    pub use super::operators::{
+        init::*,
+        mutation::*,
+        crossover::*,
+        select::*
+    };
+    pub use super::fitness::evaluate::*;
+}
