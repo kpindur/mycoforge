@@ -1,5 +1,4 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-use mycoforge::operators::set::OperatorsBuilder;
 use rand::Rng;
 use std::collections::HashMap;
 use std::path::Path;
@@ -11,13 +10,8 @@ use mycoforge::dataset::core::Dataset;
 
 use mycoforge::ea_components;
 use mycoforge::optimizers::ga::{EABuilder, EAComponents};
-use mycoforge::common::traits::{Evaluator, Individual, Initializer, Mutator, Optimizer, Crossoverer};
 
-use mycoforge::tree::core::{tree::TreeGenotype, individual::TreeIndividual};
-use mycoforge::tree::operators::{init::Grow, mutation::SubtreeMutation, crossover::SubtreeCrossover, select::TournamentSelection};
-use mycoforge::tree::fitness::evaluate::MeanSquared;
-
-use mycoforge::operators::functions::symbolic::{add, sub, mul, div};
+use mycoforge::prelude::tree_gp::*;
 
 fn x(data: &[&[f64]]) -> Vec<f64> { return data[0].to_vec();}
 
