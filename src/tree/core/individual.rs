@@ -3,6 +3,8 @@
 //! This module provides the [`TreeIndividual`] structure that combines genotype with its fitness
 //! value.
 use crate::common::traits::{Genotype, Individual};
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize};
 
 /// Individual representation that pairs genotype with its fitness value.
 ///
@@ -31,6 +33,7 @@ use crate::common::traits::{Genotype, Individual};
 /// );
 /// ```
 #[derive(Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct TreeIndividual<G: Genotype> {
     genotype: G,
     fitness: f64
