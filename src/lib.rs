@@ -11,6 +11,7 @@
 //! - [`operators`] - Evolutionary operators and function sets
 //! - [`dataset`] - Dataset handling utilities
 //! - [`tree`] - Tree-based genetic Programming
+//! - [`population`] - Population definition
 //! - [`optimizers`] - Optimization algorithms
 
 #![allow(clippy::needless_return)]
@@ -31,7 +32,7 @@ pub mod tree;
 
 //pub mod utils;
 
-//pub mod population;
+pub mod population;
 
 pub mod optimizers;
 
