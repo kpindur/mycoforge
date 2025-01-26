@@ -18,7 +18,7 @@ pub trait Genotype: Clone + Display {}
 /// # Arguments
 /// * `rng: &mut Rng` - random number generator, see [`Rng`][`rand::Rng`]
 /// * `sampler: &OperatorSampler` - helper structure for sampling operators, see
-/// [`OperatorSampler`][`crate::operators::sampler::OperatorSampler`]
+///     [`OperatorSampler`][`crate::operators::sampler::OperatorSampler`]
 ///
 /// # Returns
 /// * `G` - newly initialized genotype
@@ -32,7 +32,7 @@ pub trait Initializer<G: Genotype> {
 /// * `rng: &mut Rng` - random number generator, see [`Rng`][`rand::Rng`]
 /// * `individual: &G` - [`Genotype`][`crate::common::traits::Genotype`] to variate
 /// * `sampler: &OperatorSampler` - helper structure for sampling operators, see
-/// [`OperatorSampler`][`crate::operators::sampler::OperatorSampler`]
+///     [`OperatorSampler`][`crate::operators::sampler::OperatorSampler`]
 ///
 /// # Returns
 /// * `G` - mutated individual
@@ -47,11 +47,11 @@ pub trait Mutator<G: Genotype> {
 /// * `parent1: &G` - first [`Genotype`][`crate::common::traits::Genotype`] to variate
 /// * `parent2: &G` - second [`Genotype`][`crate::common::traits::Genotype`] to variate
 /// * `sampler: &OperatorSampler` - helper structure for sampling operators, see
-/// [`OperatorSampler`][`crate::operators::sampler::OperatorSampler`]
+///     [`OperatorSampler`][`crate::operators::sampler::OperatorSampler`]
 ///
 /// # Returns
 /// * `Vec<G>` - two crossed over individuals, first individual with subtree from the second
-/// individual and second individual with subtree from the first individual
+///     individual and second individual with subtree from the first individual
 pub trait Crossoverer<G: Genotype> {
     fn variate<R: Rng>(&self, rng: &mut R, parent1: &G, parent2: &G, sampler: &OperatorSampler) -> Vec<G>;
 }
@@ -72,9 +72,9 @@ pub trait Data {
 /// * `tree: &G` - [`Genotype`][`crate::common::traits::Genotype`] to evaluate
 /// * `data: &Self::D` - dataset implementing [`Data`][`crate::common::traits::Data`] trait
 /// * `map: &HashMap<String, (usize, VectorFunction)>` - mapping of function names to their 
-/// implementations, see [`VectorFunction`][`crate::common::types::VectorFunction`]
+///     implementations, see [`VectorFunction`][`crate::common::types::VectorFunction`]
 /// * `cache: &HashMap<G, f64>` - (memoized version only) cache of previously computed 
-/// fitness values
+///     fitness values
 ///
 /// # Returns
 /// * `f64` - computed fitness value
@@ -98,7 +98,7 @@ pub trait Evaluator<G: Genotype> {
 /// # Arguments
 /// * `rng: &mut Rng` - random number generator, see [`Rng`][`rand::Rng`]
 /// * `population: &[Self::I]` - slice of individuals implementing 
-/// [`Individual`][`crate::common::traits::Individual`]
+///     [`Individual`][`crate::common::traits::Individual`]
 ///
 /// # Returns
 /// * `G` - selected [`Genotype`][`crate::common::traits::Genotype`]
