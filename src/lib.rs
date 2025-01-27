@@ -21,6 +21,8 @@ pub mod operators;
 
 pub mod dataset;
 
+pub mod loggers;
+
 //pub mod linear;
 
 pub mod tree;

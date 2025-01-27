@@ -1,8 +1,8 @@
 use std::fs;
 use log::LevelFilter;
-use mycoforge::dataset::logger::LogEntries;
-use mycoforge::dataset::logger::Logger;
-use mycoforge::dataset::logger::SimpleLogger;
+use mycoforge::loggers::core::LogEntries;
+use mycoforge::loggers::core::Logger;
+use mycoforge::loggers::core::SimpleLogger;
 
 use std::sync::{Arc, Mutex};
 
@@ -22,7 +22,7 @@ fn test_file_logging() {
     fs::remove_file(test_file).unwrap_or_else(|_| panic!("Failed to delete file {}", test_file));
 }
 
-use mycoforge::dataset::logger::PostgresLogger;
+use mycoforge::loggers::core::PostgresLogger;
 use std::thread;
 use std::time::Duration;
 use log::{Level, Record, Log};
