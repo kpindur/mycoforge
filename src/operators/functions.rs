@@ -32,6 +32,8 @@ pub mod symbolic {
         /// Computes natural logarithm
         fn ln(self) -> Self;
 
+        /// Calculate absolute value
+        fn abs(self) -> Self;
         /// Check if the value is finite
         fn is_finite(self) -> bool;
         /// Returns sign of value
@@ -50,6 +52,7 @@ pub mod symbolic {
         fn cos(self) -> Self { return self.cos(); }
         fn ln(self) -> Self { return self.ln(); }
 
+        fn abs(self) -> Self { return self.abs(); }
         fn is_finite(self) -> bool { return self.is_finite(); }
         fn signum(self) -> Self { return self.signum(); }
     }
@@ -66,6 +69,7 @@ pub mod symbolic {
         fn cos(self) -> Self { return self.cos(); }
         fn ln(self) -> Self { return self.ln(); }
 
+        fn abs(self) -> Self { return self.abs(); }
         fn is_finite(self) -> bool { return self.is_finite(); }
         fn signum(self) -> Self { return self.signum(); }
     }
@@ -112,7 +116,7 @@ pub mod symbolic {
 
     /// Protected division operator (returns 1.0 for division by values smaller than epsilon)
     pub fn div<T: Div<Output = T> + Float>(args: &[&[T]]) -> Vec<T> {
-        return apply_binary(|a, b| if b < T::epsilon() { return T::one(); } else { return a / b }, args);
+        return apply_binary(|a, b| if b.abs() < T::epsilon() { return T::one(); } else { return a / b }, args);
     }
 
     /// Protected sine operator (returns 0.0 for non-finite inputs)
