@@ -58,7 +58,7 @@ impl Evaluator<TreeGenotype> for MeanSquared {
                         for _ in 0..*n {
                             operands.push(stack.pop().unwrap());
                         }
-                        let operands = operands.iter().rev().map(|v| v.as_slice()).collect::<Vec<&[f64]>>();
+                        let operands = operands.iter().map(|v| v.as_slice()).collect::<Vec<&[f64]>>();
                         let result = op(&operands);
                         stack.push(result);
                     },
@@ -67,10 +67,14 @@ impl Evaluator<TreeGenotype> for MeanSquared {
         }
         let (no_dims, operands) = data.data_train();
         let truths = &operands[no_dims];
-        let result = stack.pop().unwrap().iter()
+        let predictions = stack.pop().unwrap();
+        let result = predictions.iter()
             .zip(truths.iter())
-            .map(|(t,y )| (t - y).powi(2))
-            .sum::<f64>();
+            .map(|(t,y )| {
+                let diff = t - y;
+                let sq = diff.powi(2);
+                return sq;
+            }).sum::<f64>();
         return result;
     }
 
