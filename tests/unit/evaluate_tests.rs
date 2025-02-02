@@ -7,6 +7,7 @@ use rstest::{fixture, rstest};
 use serde::Deserialize;
 
 use mycoforge::common::types::VectorFunction;
+use mycoforge::common::traits::Data;
 use mycoforge::common::traits::Evaluator;
 
 use mycoforge::tree::core::tree::TreeGenotype;
@@ -46,16 +47,8 @@ fn sample_tree() -> TreeGenotype {
 
 #[fixture]
 fn sample_dataset() -> Dataset {
-    let data = Dataset::from_csv(&mut rand::thread_rng(), "tests/fixtures/test_f1.csv", 0.0)
+    let data = Dataset::from_csv("tests/fixtures/test_f1.csv", 1)
         .expect("Failed to load dataset");
-
-    assert_eq!(data.test_data().len(), data.train_data().len(),
-        "Test and train data should be of the same length! {} ? {}", 
-        data.test_data().len(), data.train_data().len()
-    );
-    assert_eq!(vec!["x".to_string(), "y".to_string()], *data.feature_names(),
-        "Feature names do not match! Expected {:?}, found {:?}", vec!["x", "y"], data.feature_names()
-    );
 
     return data;
 }
@@ -83,15 +76,13 @@ struct TestIndividual {
 
 #[fixture]
 fn deap_test_cases() -> (Vec<(TreeGenotype, f64)>, Dataset) {
-    let mut rng = rand::thread_rng();
-
     let filename = "tests/fixtures/all_populations.json";
     let file = File::open(filename)
         .unwrap_or_else(|e| panic!("failed to open file {}: {}", filename, e));
     let reader = BufReader::new(file);
 
     let filename = "tests/fixtures/polynomial_dataset.csv";
-    let dataset = Dataset::from_csv(&mut rng, filename, 0.0)
+    let dataset = Dataset::from_csv(filename, 1)
         .unwrap_or_else(|e| panic!("failed to load dataset from file {}: {}", filename, e));
 
     let individuals: Vec<Vec<TestIndividual>> = serde_json::from_reader(reader)
@@ -129,7 +120,7 @@ fn test_deap_evaluation(
 
     for (tree, expected) in test_cases {
         let result = metric.evaluate(&tree, &dataset, &map);
-        let result = result / (dataset.train_data()[1].len() as f64);
+        let result = result / (dataset.data().1.len() as f64);
         assert!((expected - result).abs() < epsilon, 
             "Result differs from expected value! {} != {}", expected, result);
     }

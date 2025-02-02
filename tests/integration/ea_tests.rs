@@ -103,12 +103,15 @@ use rstest::{fixture, rstest};
 #[fixture]
 fn sample_dataset() -> Dataset {
     let feature_names = ["x"].iter().map(|&s| s.to_string()).collect::<Vec<String>>();
+    let target_name = "y".to_string();
+
     let xs: Vec<f64> = vec![0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
     let ys = xs.iter().map(|&v| v.powi(2) + v ).collect::<Vec<f64>>();
-    let test_data = vec![xs, ys];
-    let no_dims = test_data.len() - 1;
 
-    let data = Dataset::new(feature_names, no_dims, test_data.clone(), test_data);
+    let features = vec![xs.clone()];
+    let target = ys.clone();
+
+    let data = Dataset::new(feature_names, target_name, features, target);
     
     return data;
 }
