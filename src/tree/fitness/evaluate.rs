@@ -40,7 +40,7 @@ impl Default for MeanSquared {
 impl Evaluator<TreeGenotype> for MeanSquared {
     type D = Dataset;
 
-    fn evaluate(&self, tree: &TreeGenotype, data: &Self::D, map: &HashMap<String, (usize, fn(&[&[f64]])-> Vec<f64>)>) -> f64 {
+    fn evaluate(&self, tree: &TreeGenotype, dataset: &Self::D, map: &HashMap<String, (usize, fn(&[&[f64]])-> Vec<f64>)>) -> f64 {
         let mut stack: Vec<Vec<f64>> = Vec::new();
 
         for i in (0..tree.arena().len()).rev() {
@@ -49,7 +49,7 @@ impl Evaluator<TreeGenotype> for MeanSquared {
             if let Some((arity, op)) = map.get(node) {
                 match arity {
                     0 => {
-                        let operands = data.data_train().1.iter().map(|v| v.as_slice()).collect::<Vec<&[f64]>>();
+                        let operands = dataset.data().0.iter().map(|v| v.as_slice()).collect::<Vec<&[f64]>>();
                         let result = op(&operands);
                         stack.push(result);
                     },
@@ -65,11 +65,10 @@ impl Evaluator<TreeGenotype> for MeanSquared {
                 }
             }
         }
-        let (no_dims, operands) = data.data_train();
-        let truths = &operands[no_dims];
+        let targets = dataset.data().1;
         let predictions = stack.pop().unwrap();
         let result = predictions.iter()
-            .zip(truths.iter())
+            .zip(targets.iter())
             .map(|(t,y )| {
                 let diff = t - y;
                 let sq = diff.powi(2);
