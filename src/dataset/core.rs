@@ -3,6 +3,7 @@ use crate::common::traits::Data;
 use crate::dataset::error::DatasetError;
 
 use super::loaders::csv_loader::load_csv;
+use super::loaders::parquet_loader::load_parquet;
 
 
 /// Dataset structure holding feature names and split data vectors.
@@ -24,8 +25,9 @@ impl Dataset {
     ///
     /// # Arguments
     /// * `feature_names: Vec<String>` - names of features
-    /// * `no_dims: usize` - number of input dimensions
-    /// * `data` - stored data, includes both features and truth vectors.
+    /// * `target_name: String` - name of the target
+    /// * `features: Vec<Vec<f64>>` - n-dimensional array of features
+    /// * `targets: Vec<f64>` - 1-dimensional array of targets
     pub fn new(feature_names: Vec<String>, target_name: String, features: Vec<Vec<f64>>, targets: Vec<f64>) -> Self {
         return Self { feature_names, target_name, features, targets };
     }
@@ -39,6 +41,19 @@ impl Dataset {
     /// * `Result<Self, DatasetError>` - new dataset or error if loading fails
     pub fn from_csv(path: &str, n_features: usize) -> Result<Self, DatasetError> {
         let (feature_names, target_name, features, targets) = load_csv(path, n_features)?;
+
+        return Ok(Self::from_vector(feature_names, target_name, features, targets));
+    }
+
+    /// Loads dataset from Parquet file.
+    ///
+    /// # Arguments
+    /// * `path: &str` = path to parquet file
+    ///
+    /// # Returns
+    /// * `Result<Self, DatasetError>` - new dataset or error if loading fails
+    pub fn from_parquet(path: &str) -> Result<Self, DatasetError> {
+        let (feature_names, target_name, features, targets) = load_parquet(path)?;
 
         return Ok(Self::from_vector(feature_names, target_name, features, targets));
     }
