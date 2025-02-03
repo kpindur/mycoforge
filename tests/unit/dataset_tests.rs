@@ -70,3 +70,61 @@ fn test_creation() {
         targets ,dataset.data().1
     );
 }
+
+use std::fs::File;
+use arrow::array::Float64Array;
+use arrow::datatypes::{Schema, Field, DataType};
+use arrow::record_batch::RecordBatch;
+use parquet::arrow::arrow_writer::ArrowWriter;
+
+#[test]
+fn test_load_parquet() -> Result<(), Box<dyn std::error::Error>> {
+    const TEST_FILE: &str = "test_data.parquet";
+
+    let feature1 = Float64Array::from(vec![1.0, 2.0, 3.0]);
+    let feature2 = Float64Array::from(vec![4.0, 5.0, 6.0]);
+    let target = Float64Array::from(vec![7.0, 8.0, 9.0]);
+    
+    let schema = Schema::new(vec![
+        Field::new("f1", DataType::Float64, false),
+        Field::new("f2", DataType::Float64, false),
+        Field::new("target", DataType::Float64, false),
+    ]);
+    
+    let batch = RecordBatch::try_new(
+        std::sync::Arc::new(schema),
+        vec![
+            std::sync::Arc::new(feature1),
+            std::sync::Arc::new(feature2),
+            std::sync::Arc::new(target),
+        ],
+    )?;
+    
+    let file = File::create(TEST_FILE)?;
+    let mut writer = ArrowWriter::try_new(file, batch.schema(), None)?;
+    writer.write(&batch)?;
+    writer.close()?;
+    
+    let dataset = Dataset::from_parquet(TEST_FILE)?;
+    let (feature_names, target_name) = dataset.names();
+    let (features, targets) = dataset.data();
+
+    assert_eq!(feature_names.clone(), ["f1", "f2"].iter().map(|s| s.to_string()).collect::<Vec<String>>(),
+        "Loaded data is different! Expected: {:?}, found {:?}",
+        vec!["f1", "f2"], feature_names
+    );
+    assert_eq!(target_name.clone(), "target".to_string(),
+        "Loaded target name is different! Expected: {:?}, found {:?}",
+        "target", target_name
+    );
+    assert_eq!(features.clone(), vec![vec![1.0, 2.0, 3.0], vec![4.0, 5.0, 6.0]],
+        "Loaded features are different! Expected: {:?}, found: {:?}",
+        vec![vec![1.0, 2.0, 3.0], vec![4.0, 5.0, 6.0]], features
+    );
+    assert_eq!(targets.clone(), vec![7.0, 8.0, 9.0],
+        "Loaded target values are different! Expected: {:?}, found: {:?}",
+        vec![7.0, 8.0, 9.0], targets
+    );
+
+    return Ok(());
+}
