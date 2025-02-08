@@ -1,27 +1,35 @@
+use std::fs::File;
 use std::path::Path;
+use std::io::{BufReader, BufRead};
 use csv::ReaderBuilder;
+use std::collections::HashMap;
 
 use crate::dataset::error::DatasetError;
+use crate::dataset::core::{OutputData, Metadata};
 
-pub(crate) fn load_csv(
-        path: &str, 
-        n_features: usize
-    ) -> Result<(Vec<String>, String, Vec<Vec<f64>>, Vec<f64>), DatasetError> {
+fn validate_csv_path(path: &str) -> Result<(), DatasetError> {
     let path = Path::new(path);
     if !path.exists() { 
         return Err(DatasetError::IoError(
-                std::io::Error::new(
-                    std::io::ErrorKind::NotFound,
-                    format!("File not found! path: {:?}", path))));
+            std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!("File not found! path: {:?}", path)
+            )
+        ));
     }
     if path.extension().and_then(|s| s.to_str()) != Some("csv") {
         return Err(DatasetError::InvalidFormat("File must be a CSV".into()));
     }
+    return Ok(());
+}
 
+fn parse_csv<R: std::io::Read>(
+    reader: R,
+    n_features: usize
+) -> Result<OutputData, DatasetError> {
     let mut reader = ReaderBuilder::new()
         .has_headers(true)
-        .from_path(path)
-        .map_err(|e| DatasetError::IoError(e.into()))?;
+        .from_reader(reader);
 
     let headers = reader.headers()
         .map_err(|_| DatasetError::InvalidFormat("Cannot read headers".into()))?.iter()
@@ -60,3 +68,52 @@ pub(crate) fn load_csv(
         targets
     ));
 }
+
+pub(crate) fn load_csv(
+        path: &str, 
+        n_features: usize
+    ) -> Result<OutputData, DatasetError> {
+    validate_csv_path(path)?;
+    
+    let file = File::open(path)
+        .map_err(DatasetError::IoError)?;
+        
+    return parse_csv(file, n_features);
+}
+
+pub(crate) fn load_csv_with_metadata(
+    path: &str,
+    n_features: usize
+) -> Result<(Metadata, OutputData), DatasetError> {
+    validate_csv_path(path)?;
+    
+    let file = File::open(path)
+        .map_err(DatasetError::IoError)?;
+    let reader = BufReader::new(file);
+
+    let mut metadata = HashMap::new();
+    let mut data_lines = Vec::new();
+    
+    for line in reader.lines() {
+        let line = line.map_err(DatasetError::IoError)?;
+        if line.starts_with('#') {
+            if let Some((key, value)) = line.strip_prefix('#')
+                .expect("Failed to strip prefix!")
+                    .split_once(':') 
+            {
+                metadata.insert(
+                    key.trim().to_string(),
+                    value.trim().to_string()
+                );
+            }
+        } else {
+            data_lines.push(line);
+        }
+    }
+    
+    let csv_content = data_lines.join("\n");
+    let output_data = parse_csv(csv_content.as_bytes(), n_features)?;
+    
+    return Ok((metadata, output_data));
+}
+
