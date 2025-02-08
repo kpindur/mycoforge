@@ -17,6 +17,7 @@ fn test_manual_creation() {
     let features = vec![data[0].clone()];
     let targets = data[1].clone();
     let dataset = Dataset::new(
+        None, 
         headers[0..headers.len()-2].to_vec(), headers[headers.len()-1].clone(),
         features, targets
     );
@@ -45,7 +46,8 @@ fn test_creation() {
     let features = vec![data_x, data_y];
     let targets = data_z;
 
-    let dataset = Dataset::from_vector(
+    let dataset = Dataset::new(
+        None,
         feature_names.clone(), target_name.clone(), 
         features.clone(), targets.clone()
     );
@@ -71,15 +73,38 @@ fn test_creation() {
     );
 }
 
+
 use std::fs::File;
+use std::collections::HashMap;
 use arrow::array::Float64Array;
 use arrow::datatypes::{Schema, Field, DataType};
 use arrow::record_batch::RecordBatch;
 use parquet::arrow::arrow_writer::ArrowWriter;
 
 #[test]
+fn test_load_csv_with_metadata() -> Result<(), Box<dyn std::error::Error>> {
+    const TEST_FILE: &str = "tests/fixtures/test_metadata_f1.csv";
+
+    let dataset = Dataset::from_csv_with_metadata(TEST_FILE, 1)?;
+    
+    let expected_metadata: HashMap<String, String> = [
+        ("function".to_string(), "f(x) = x^4 + x^3 +x^2 + x".to_string()),
+        ("description".to_string(), "Standard polynomial".to_string()),
+    ].into_iter().collect();
+
+    let loaded_metada = dataset.metadata().clone().expect("Metadata does not exist!");
+
+    assert_eq!(loaded_metada, expected_metadata,
+        "Loaded metadata does not match! Expected: {:?}, found {:?}",
+        loaded_metada, expected_metadata
+    );
+
+    return Ok(());
+}
+
+#[test]
 fn test_load_parquet() -> Result<(), Box<dyn std::error::Error>> {
-    const TEST_FILE: &str = "test_data.parquet";
+    const TEST_FILE: &str = "tests/fixtures/test_data.parquet";
 
     let feature1 = Float64Array::from(vec![1.0, 2.0, 3.0]);
     let feature2 = Float64Array::from(vec![4.0, 5.0, 6.0]);
