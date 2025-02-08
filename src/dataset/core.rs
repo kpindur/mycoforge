@@ -93,6 +93,11 @@ impl Dataset {
         return Self { metadata, feature_names, target_name, features, targets };
     }
 
+    pub fn metadata(&self) -> &Option<Metadata> { return &self.metadata; }
+    pub fn feature_names(&self) -> &Vec<String> { return &self.feature_names; }
+    pub fn target_name(&self) -> &String { return &self.target_name; }
+    pub fn features(&self) -> &Vec<Vec<f64>> { return &self.features; }
+    pub fn targets(&self) -> &Vec<f64> { return &self.targets; }
 }
 
 impl Data for Dataset {
