@@ -1,3 +1,10 @@
+use std::fs::File;
+use std::collections::HashMap;
+use arrow::array::Float64Array;
+use arrow::datatypes::{Schema, Field, DataType};
+use arrow::record_batch::RecordBatch;
+use parquet::arrow::arrow_writer::ArrowWriter;
+
 use mycoforge::{common::traits::Data, dataset::core::Dataset};
 
 fn sample_data() -> (Vec<String>, Vec<Vec<f64>>) {
@@ -10,15 +17,49 @@ fn sample_data() -> (Vec<String>, Vec<Vec<f64>>) {
     return (headers, data);
 }
 
+fn setup_test_parquet_data(path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    if std::path::Path::new(path).exists() {
+        return Ok(());
+    }
+
+    let feature1 = Float64Array::from(vec![1.0, 2.0, 3.0]);
+    let feature2 = Float64Array::from(vec![4.0, 5.0, 6.0]);
+    let target = Float64Array::from(vec![7.0, 8.0, 9.0]);
+
+        let schema = Schema::new(vec![
+        Field::new("f1", DataType::Float64, false),
+        Field::new("f2", DataType::Float64, false),
+        Field::new("target", DataType::Float64, false),
+    ]);
+    
+    let batch = RecordBatch::try_new(
+        std::sync::Arc::new(schema),
+        vec![
+           std::sync::Arc::new(feature1),
+           std::sync::Arc::new(feature2),
+           std::sync::Arc::new(target),
+        ],
+    )?;
+    
+    if let Some(parent) = std::path::Path::new(path).parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    
+    let file = File::create(path)?;
+    let mut writer = ArrowWriter::try_new(file, batch.schema(), None)?;
+    writer.write(&batch)?;
+    writer.close()?;
+
+    return Ok(());
+}
+
 #[test]
 fn test_manual_creation() {
     let (headers, data) = sample_data();
 
     let features = vec![data[0].clone()];
     let targets = data[1].clone();
-    let dataset = Dataset::new(
-        None, 
-        headers[0..headers.len()-2].to_vec(), headers[headers.len()-1].clone(),
+    let dataset = Dataset::new(headers[0..headers.len()-2].to_vec(), headers[headers.len()-1].clone(),
         features, targets
     );
 
@@ -47,7 +88,6 @@ fn test_creation() {
     let targets = data_z;
 
     let dataset = Dataset::new(
-        None,
         feature_names.clone(), target_name.clone(), 
         features.clone(), targets.clone()
     );
@@ -73,63 +113,12 @@ fn test_creation() {
     );
 }
 
-
-use std::fs::File;
-use std::collections::HashMap;
-use arrow::array::Float64Array;
-use arrow::datatypes::{Schema, Field, DataType};
-use arrow::record_batch::RecordBatch;
-use parquet::arrow::arrow_writer::ArrowWriter;
-
-#[test]
-fn test_load_csv_with_metadata() -> Result<(), Box<dyn std::error::Error>> {
-    const TEST_FILE: &str = "tests/fixtures/test_metadata_f1.csv";
-
-    let dataset = Dataset::from_csv_with_metadata(TEST_FILE, 1)?;
-    
-    let expected_metadata: HashMap<String, String> = [
-        ("function".to_string(), "f(x) = x^4 + x^3 +x^2 + x".to_string()),
-        ("description".to_string(), "Standard polynomial".to_string()),
-    ].into_iter().collect();
-
-    let loaded_metada = dataset.metadata().clone().expect("Metadata does not exist!");
-
-    assert_eq!(loaded_metada, expected_metadata,
-        "Loaded metadata does not match! Expected: {:?}, found {:?}",
-        loaded_metada, expected_metadata
-    );
-
-    return Ok(());
-}
-
 #[test]
 fn test_load_parquet() -> Result<(), Box<dyn std::error::Error>> {
     const TEST_FILE: &str = "tests/fixtures/test_data.parquet";
 
-    let feature1 = Float64Array::from(vec![1.0, 2.0, 3.0]);
-    let feature2 = Float64Array::from(vec![4.0, 5.0, 6.0]);
-    let target = Float64Array::from(vec![7.0, 8.0, 9.0]);
-    
-    let schema = Schema::new(vec![
-        Field::new("f1", DataType::Float64, false),
-        Field::new("f2", DataType::Float64, false),
-        Field::new("target", DataType::Float64, false),
-    ]);
-    
-    let batch = RecordBatch::try_new(
-        std::sync::Arc::new(schema),
-        vec![
-            std::sync::Arc::new(feature1),
-            std::sync::Arc::new(feature2),
-            std::sync::Arc::new(target),
-        ],
-    )?;
-    
-    let file = File::create(TEST_FILE)?;
-    let mut writer = ArrowWriter::try_new(file, batch.schema(), None)?;
-    writer.write(&batch)?;
-    writer.close()?;
-    
+    setup_test_parquet_data(TEST_FILE)?;
+
     let dataset = Dataset::from_parquet(TEST_FILE)?;
     let (feature_names, target_name) = dataset.names();
     let (features, targets) = dataset.data();

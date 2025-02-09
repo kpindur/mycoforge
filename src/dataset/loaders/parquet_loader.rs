@@ -1,10 +1,26 @@
 use std::path::Path;
+use std::collections::HashMap;
 use arrow::array::Float64Array;
 use arrow::array::RecordBatch;
 use arrow::array::RecordBatchReader;
 use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
 
 use crate::dataset::error::DatasetError;
+use crate::dataset::core::OutputData;
+
+fn validate_parquet_path(path: &str) -> Result<(), DatasetError> {
+    let path = Path::new(path);
+    if !path.exists() {
+        return Err(DatasetError::IoError(std::io::Error::new(
+            std::io::ErrorKind::NotFound, 
+            "File does not exist"
+        )));
+    }
+    if path.extension().and_then(|s| s.to_str()) != Some("parquet") {
+        return Err(DatasetError::InvalidFormat("File must be a Parquet".into()));
+    }
+    return Ok(());
+}
 
 fn process_batch(
     batch: &RecordBatch,
@@ -37,17 +53,8 @@ fn process_batch(
 
 pub(crate) fn load_parquet(
     path: &str
-) -> Result<(Vec<String>, String, Vec<Vec<f64>>, Vec<f64>), DatasetError> {
-let path = Path::new(path);
-    if !path.exists() {
-        return Err(DatasetError::IoError(std::io::Error::new(
-            std::io::ErrorKind::NotFound, 
-            "File does not exist"
-        )));
-    }
-    if path.extension().and_then(|s| s.to_str()) != Some("parquet") {
-        return Err(DatasetError::InvalidFormat("File must be a Parquet".into()));
-    }
+) -> Result<OutputData, DatasetError> {
+    validate_parquet_path(path)?;
 
     let file = std::fs::File::open(path)
         .map_err(DatasetError::IoError)?;
@@ -72,11 +79,9 @@ let path = Path::new(path);
     let feature_names = fields[..n_features].to_vec();
     let target_name = fields[n_features].clone();
 
-    // Initialize vectors
     let mut features: Vec<Vec<f64>> = vec![Vec::new(); n_features];
     let mut target = Vec::new();
 
-    // Read batches
     for batch_result in reader {
         let batch = batch_result.map_err(|e| DatasetError::ParseError(e.to_string()))?;
         process_batch(&batch, &mut features, &mut target, n_features)?;

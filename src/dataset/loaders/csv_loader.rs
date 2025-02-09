@@ -5,7 +5,7 @@ use csv::ReaderBuilder;
 use std::collections::HashMap;
 
 use crate::dataset::error::DatasetError;
-use crate::dataset::core::{OutputData, Metadata};
+use crate::dataset::core::OutputData;
 
 fn validate_csv_path(path: &str) -> Result<(), DatasetError> {
     let path = Path::new(path);
@@ -80,40 +80,3 @@ pub(crate) fn load_csv(
         
     return parse_csv(file, n_features);
 }
-
-pub(crate) fn load_csv_with_metadata(
-    path: &str,
-    n_features: usize
-) -> Result<(Metadata, OutputData), DatasetError> {
-    validate_csv_path(path)?;
-    
-    let file = File::open(path)
-        .map_err(DatasetError::IoError)?;
-    let reader = BufReader::new(file);
-
-    let mut metadata = HashMap::new();
-    let mut data_lines = Vec::new();
-    
-    for line in reader.lines() {
-        let line = line.map_err(DatasetError::IoError)?;
-        if line.starts_with('#') {
-            if let Some((key, value)) = line.strip_prefix('#')
-                .expect("Failed to strip prefix!")
-                    .split_once(':') 
-            {
-                metadata.insert(
-                    key.trim().to_string(),
-                    value.trim().to_string()
-                );
-            }
-        } else {
-            data_lines.push(line);
-        }
-    }
-    
-    let csv_content = data_lines.join("\n");
-    let output_data = parse_csv(csv_content.as_bytes(), n_features)?;
-    
-    return Ok((metadata, output_data));
-}
-
