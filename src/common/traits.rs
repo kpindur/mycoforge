@@ -59,8 +59,8 @@ pub trait Crossoverer<G: Genotype> {
 /// Provides access to training and test datasets.
 ///
 /// # Returns
-/// * `data_train` - tuple of (number of samples, vector of features)
-/// * `data_test` - tuple of (number of samples, vector of features)
+/// * `names` - names for the data (feature_names: Vec<String> and target_name: String)
+/// * `data` - data contained by the structure (features: Vec<Vec<f64>> and targets: Vec<f64>)
 pub trait Data {
     fn names(&self) -> (&Vec<String>, &String);
     fn data(&self) -> (&Vec<Vec<f64>>, &Vec<f64>);
@@ -143,11 +143,5 @@ pub trait Optimizer<G: Genotype> {
     type I: Individual<G>;
     fn init_population<R: Rng>(&self, rng: &mut R, population_size: usize) -> Vec<G>;
     fn optimize<R: Rng>(&self, rng: &mut R, population: &[Self::I]) -> Vec<G>;
-}
-
-///
-///
-pub trait Validator<G: Genotype> {
-    fn validate(&self, genotype: &G) -> bool;
 }
 
