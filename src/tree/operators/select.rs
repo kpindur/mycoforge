@@ -7,7 +7,7 @@ use core::panic;
 
 use log::error;
 use rand::Rng;
-use rand::seq::SliceRandom;
+use rand::prelude::IndexedRandom;
 
 use crate::common::traits::{Individual, Selector};
 use crate::tree::core::{tree::TreeGenotype, individual::TreeIndividual};

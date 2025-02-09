@@ -4,7 +4,7 @@
 //! arities and weights.
 
 use rand::prelude::*;
-use rand::distributions::WeightedIndex;
+use rand::distr::weighted::WeightedIndex;
 
 /// Interface for sampling operators.
 pub trait Sampler {

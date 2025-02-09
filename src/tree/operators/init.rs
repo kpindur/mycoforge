@@ -6,7 +6,8 @@
 //! Serves as a template for creating custom initialization methods.
 
 use std::collections::HashMap;
-use rand::{Rng, seq::SliceRandom};
+use rand::Rng;
+use rand::prelude::IndexedRandom;
 
 use crate::common::traits::Initializer;
 use crate::tree::core::tree::TreeGenotype;
