@@ -10,6 +10,7 @@
 
 pub mod functions;
 
+pub mod builder;
 pub mod set;
 
 pub mod sampler;

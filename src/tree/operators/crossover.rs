@@ -100,12 +100,12 @@ impl SubtreeCrossover {
 
 impl Crossoverer<TreeGenotype> for SubtreeCrossover {
     fn variate<R: Rng>(&self, rng: &mut R, parent1: &TreeGenotype, parent2: &TreeGenotype, sampler: &OperatorSampler) -> Vec<TreeGenotype> {
-        if rng.gen::<f64>() > self.probability { 
+        if rng.random::<f64>() > self.probability { 
             debug!("Skipping crossover..");
             return [parent1.clone(), parent2.clone()].to_vec(); 
         }
 
-        let crossover_points: (usize, usize) = (rng.gen_range(0..parent1.arena().len()), rng.gen_range(0..parent2.arena().len()));
+        let crossover_points: (usize, usize) = (rng.random_range(0..parent1.arena().len()), rng.random_range(0..parent2.arena().len()));
         let trees = Self::swap( (parent1, parent2), crossover_points);
         debug!("Swapped trees at points: ({}, {}). Trees sizes {} and {} -> {} and {}",
             crossover_points.0, crossover_points.1, 

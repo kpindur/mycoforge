@@ -99,12 +99,12 @@ impl SubtreeMutation {
 
 impl Mutator<TreeGenotype> for SubtreeMutation {
     fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
-        if rng.gen::<f64>() > self.probability { 
+        if rng.random::<f64>() > self.probability { 
             debug!("Skipping mutation..");
             return individual.clone(); 
         }
         
-        let mutation_point: usize = rng.gen_range(0..individual.arena().len());
+        let mutation_point: usize = rng.random_range(0..individual.arena().len());
         
         let init_scheme = Grow::new(self.depth_limits.0, self.depth_limits.1);
         let subtree = init_scheme.initialize(rng, sampler);
@@ -207,12 +207,12 @@ impl SizeFairMutation {
 
 impl Mutator<TreeGenotype> for SizeFairMutation {
     fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
-        if rng.gen::<f64>() > self.probability {
+        if rng.random::<f64>() > self.probability {
             debug!("Skipping mutation");
             return individual.clone();
         }
 
-        let mutation_point = rng.gen_range(0..individual.arena().len());
+        let mutation_point = rng.random_range(0..individual.arena().len());
         let depth_limits = self.calculate_depths(individual, mutation_point);
 
         let init_scheme = Grow::new(depth_limits.0, depth_limits.1);
@@ -282,12 +282,12 @@ impl PointMutation {
 
 impl Mutator<TreeGenotype> for PointMutation {
     fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
-        if rng.gen::<f64>() > self.probability { 
+        if rng.random::<f64>() > self.probability { 
             debug!("Skipping mutation..");
             return individual.clone(); 
         }
         
-        let mutation_point: usize = rng.gen_range(0..individual.arena().len());
+        let mutation_point: usize = rng.random_range(0..individual.arena().len());
         let index = sampler.operators().iter()
             .position(|s| *s == individual.arena()[mutation_point])
             .expect("Failed to find operator in given sampler!");
@@ -392,7 +392,7 @@ impl ConstantMutation {
 
 impl Mutator<TreeGenotype> for ConstantMutation {
     fn variate<R: Rng>(&self, rng: &mut R, individual: &TreeGenotype, sampler: &OperatorSampler) -> TreeGenotype {
-        if rng.gen::<f64>() > self.probability {
+        if rng.random::<f64>() > self.probability {
             debug!("Skipping mutation..");
             return individual.clone();
         }
@@ -409,11 +409,11 @@ impl Mutator<TreeGenotype> for ConstantMutation {
             return individual.clone();
         }
 
-        let mutation_point = constant_positions[rng.gen_range(0..constant_positions.len())];
+        let mutation_point = constant_positions[rng.random_range(0..constant_positions.len())];
 
         let current_value = arena[mutation_point].parse::<f64>()
             .unwrap_or_else(|_| panic!("Failed to parse constant node: {}", arena[mutation_point]));
-        let delta = 1.0 + (rng.gen::<f64>() * 2.0 - 1.0) * self.mutation_rate;
+        let delta = 1.0 + (rng.random::<f64>() * 2.0 - 1.0) * self.mutation_rate;
         let new_value = if let Some((min, max)) = self.range_limits {
             (current_value * delta).clamp(min, max)
         } else { current_value * delta };

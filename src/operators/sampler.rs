@@ -68,6 +68,12 @@ impl OperatorSampler {
         }
         return Self { operators: filtered_operators, arity: filtered_arity, weights: filtered_weights };
     }
+
+    /// Samples just the index of an operator rather than returning the operator itself
+    pub fn sample_index<R: Rng>(&self, rng: &mut R) -> usize {
+        let dist = WeightedIndex::new(&self.weights).unwrap();
+        return dist.sample(rng);
+    }
 }
 
 impl Sampler for OperatorSampler {

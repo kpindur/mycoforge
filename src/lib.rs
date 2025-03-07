@@ -40,7 +40,7 @@ pub mod optimizers;
 pub mod prelude {
     pub mod tree_gp {
         pub use crate::common::traits::*;
-        pub use crate::operators::set::OperatorsBuilder;
+        pub use crate::operators::builder::OperatorsBuilder;
         pub use crate::operators::functions::symbolic::*;
         pub use crate::tree::components::*;
     }
